@@ -5,13 +5,16 @@ using namespace std;
 
 class Graph
 {
+private:
   int V;
   vector<vector<int>> adj;
+  void add_the_edge_internal(int v, int w, bool directed);
 
 public:
   Graph(int V);
   void read_graph_from_file();
   void print_graph();
+  void add_the_edge();
 };
 
 Graph::Graph(int V) : V(V), adj(V) {};
@@ -66,11 +69,69 @@ void Graph::print_graph()
   }
 }
 
+void Graph::add_the_edge_internal(int v, int w, bool directed)
+{
+  adj[v].push_back(w);
+  if (!directed)
+    adj[w].push_back(v);
+}
+
+void Graph::add_the_edge()
+{
+  int vertex1, vertex2;
+  bool directed, check = true;
+  cout << "Enter the two already existing vertexes between which you want to add an edge: ";
+  while (check)
+  {
+    cin >> vertex1;
+    if(vertex1 <0 || vertex1 > V-1) 
+      cout << "Incorrect input of the first vertex. Please try again: ";
+    else check=false;
+  }
+  check=true;
+
+    while (check)
+  {
+    cin >> vertex2;
+    if(vertex2 <0 || vertex2 > V-1) 
+      cout << "Incorrect input of the second vertex. Please try again: ";
+    else check=false;
+  }
+
+  check=true;
+
+  cout << "Specify if the graph is directed or not (type 'y' for yes, 'n' for no): ";
+  char answer;
+  while (check)
+  {
+    cin >> answer;
+    switch (answer)
+    {
+    case 'y':
+      directed = true;
+      check = false;
+      break;
+    case 'n':
+      directed = false;
+      check = false;
+      break;
+    default:
+      cout << "Incorrect input. Please try again: ";
+      break;
+    }
+  }
+  add_the_edge_internal(vertex1, vertex2, directed);
+}
+
 int main()
 {
   int V = 6;
   Graph graph(V);
   graph.read_graph_from_file();
+  cout << "old graph:\n";
+  graph.print_graph();
+  graph.add_the_edge();
+  cout << "\n\nnew graph:\n";
   graph.print_graph();
   return 0;
 }
