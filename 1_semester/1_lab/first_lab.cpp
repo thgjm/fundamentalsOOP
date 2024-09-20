@@ -8,7 +8,7 @@ class Graph
   int V;
   vector<vector<int>> adj;
 
-  public:
+public:
   Graph(int V);
   void read_graph_from_file();
   void print_graph();
@@ -23,11 +23,14 @@ void Graph::read_graph_from_file()
   if (!fp.is_open())
     return;
   string line;
-  while (getline(fp, line) && vertex<V)
+  while (getline(fp, line) && vertex < V)
   {
     if (line.empty())
+    {
+      vertex++;
       continue;
-    
+    }
+
     int i = 0;
     while (i < line.size())
     {
@@ -50,11 +53,24 @@ void Graph::read_graph_from_file()
   fp.close();
 }
 
+void Graph::print_graph()
+{
+  for (int v = 0; v < V; v++)
+  {
+    cout << "vertex " << v << ": ";
+    for (auto i = adj[v].begin(); i != adj[v].end(); i++)
+      cout << *i << " ";
+    if (adj[v].empty())
+      cout << "∅";
+    cout << endl;
+  }
+}
 
 int main()
 {
-  int V=6;
+  int V = 6;
   Graph graph(V);
   graph.read_graph_from_file();
+  graph.print_graph();
   return 0;
 }
