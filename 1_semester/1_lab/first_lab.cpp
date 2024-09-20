@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 using namespace std;
 
 class Graph
@@ -9,12 +10,16 @@ private:
   int V;
   vector<vector<int>> adj;
   void add_the_edge_internal(int v, int w, bool directed);
+  void remove_the_edge_internal(int v, int w, bool directed);
 
 public:
   Graph(int V);
   void read_graph_from_file();
   void print_graph();
   void add_the_edge();
+  void remove_the_edge();
+  void check_the_vertex(int &vertex);
+  void is_graph_directed(bool &directed);
 };
 
 Graph::Graph(int V) : V(V), adj(V) {};
@@ -69,6 +74,41 @@ void Graph::print_graph()
   }
 }
 
+void Graph::check_the_vertex(int &vertex)
+{
+  while (true)
+  {
+    cin >> vertex;
+    if (vertex < 0 || vertex > V - 1)
+      cout << "Incorrect input of the vertex. Please try again: ";
+    else
+      break;
+  }
+}
+
+void Graph::is_graph_directed(bool &directed)
+{
+  cout << "Specify if the graph is directed or not (type 'y' for yes, 'n' for no): ";
+  char answer;
+
+  while (true)
+  {
+    cin >> answer;
+    if (answer == 'y')
+    {
+      directed = true;
+      break;
+    }
+    else if (answer == 'n')
+    {
+      directed = false;
+      break;
+    }
+    else
+      cout << "Incorrect input. Please try again: ";
+  }
+}
+
 void Graph::add_the_edge_internal(int v, int w, bool directed)
 {
   adj[v].push_back(w);
@@ -80,47 +120,43 @@ void Graph::add_the_edge()
 {
   int vertex1, vertex2;
   bool directed, check = true;
+
   cout << "Enter the two already existing vertexes between which you want to add an edge: ";
-  while (check)
-  {
-    cin >> vertex1;
-    if(vertex1 <0 || vertex1 > V-1) 
-      cout << "Incorrect input of the first vertex. Please try again: ";
-    else check=false;
-  }
-  check=true;
 
-    while (check)
-  {
-    cin >> vertex2;
-    if(vertex2 <0 || vertex2 > V-1) 
-      cout << "Incorrect input of the second vertex. Please try again: ";
-    else check=false;
-  }
+  check_the_vertex(vertex1);
+  check_the_vertex(vertex2);
 
-  check=true;
+  is_graph_directed(directed);
 
-  cout << "Specify if the graph is directed or not (type 'y' for yes, 'n' for no): ";
-  char answer;
-  while (check)
-  {
-    cin >> answer;
-    switch (answer)
-    {
-    case 'y':
-      directed = true;
-      check = false;
-      break;
-    case 'n':
-      directed = false;
-      check = false;
-      break;
-    default:
-      cout << "Incorrect input. Please try again: ";
-      break;
-    }
-  }
   add_the_edge_internal(vertex1, vertex2, directed);
+}
+
+void Graph::remove_the_edge_internal(int v, int w, bool directed)
+{
+  auto it = find(adj[v].begin(), adj[v].end(), w);
+  if (it != adj[v].end())
+    adj[v].erase(it);
+
+  if (!directed)
+  {
+    it = find(adj[w].begin(), adj[w].end(), v);
+    if (it != adj[w].end())
+      adj[w].erase(it);
+  }
+}
+
+void Graph::remove_the_edge()
+{
+  int vertex1, vertex2;
+  bool directed;
+  cout << "Enter the two already existing vertexes between which you want to remove the edge: ";
+
+  check_the_vertex(vertex1);
+  check_the_vertex(vertex2);
+
+  is_graph_directed(directed);
+
+  remove_the_edge_internal(vertex1, vertex2, directed);
 }
 
 int main()
@@ -130,7 +166,8 @@ int main()
   graph.read_graph_from_file();
   cout << "old graph:\n";
   graph.print_graph();
-  graph.add_the_edge();
+  // graph.add_the_edge();
+  graph.remove_the_edge();
   cout << "\n\nnew graph:\n";
   graph.print_graph();
   return 0;
