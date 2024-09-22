@@ -20,6 +20,7 @@ public:
   void remove_the_edge();
   void check_the_vertex(int &vertex);
   void is_graph_directed(bool &directed);
+  void add_the_vertex();
 };
 
 Graph::Graph(int V) : V(V), adj(V) {};
@@ -159,6 +160,53 @@ void Graph::remove_the_edge()
   remove_the_edge_internal(vertex1, vertex2, directed);
 }
 
+void Graph::add_the_vertex()
+{
+  V++;
+  adj.push_back(vector<int>());
+  cout << "Choose what vertex you want to add:\ntype 1 if isolated vertex;\n2 - if connected to the other one;\n3 - if in between others.\n";
+  int answer, vertex1, current_vertex = V - 1;
+  while (true)
+  {
+    cin >> answer;
+    if (answer == 1)
+      break;
+    else if (answer == 2)
+    {
+      bool directed;
+      cout << "Type in the vertex to which this one is be connected: ";
+      check_the_vertex(vertex1);
+
+      is_graph_directed(directed);
+
+      add_the_edge_internal(vertex1, current_vertex, directed);
+      break;
+    }
+    else if (answer == 3)
+    {
+      int vertex2;
+      bool directed;
+      cout << "Type in the vertexes between which this one is connected: ";
+
+      check_the_vertex(vertex1);
+
+      check_the_vertex(vertex2);
+
+      is_graph_directed(directed);
+
+      remove_the_edge_internal(vertex1, vertex2, directed);
+
+      add_the_edge_internal(vertex1, current_vertex, directed);
+
+      add_the_edge_internal(current_vertex, vertex2, directed);
+
+      break;
+    }
+    else
+      cout << "Incorrect input. Please try again: ";
+  }
+}
+
 int main()
 {
   int V = 6;
@@ -166,8 +214,7 @@ int main()
   graph.read_graph_from_file();
   cout << "old graph:\n";
   graph.print_graph();
-  // graph.add_the_edge();
-  graph.remove_the_edge();
+  graph.add_the_vertex();
   cout << "\n\nnew graph:\n";
   graph.print_graph();
   return 0;
