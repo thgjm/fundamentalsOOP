@@ -4,45 +4,7 @@
 #include <algorithm>
 using namespace std;
 
-int count_vertices()
-{
-  int vertex = 0, vertices = -1, count = 0;
-  ifstream fp("graph_test.txt");
-  if (!fp.is_open())
-    return -1;
-  string line;
-  while (getline(fp, line))
-  {
-    if (line.empty())
-    {
-      vertex++;
-      vertices = max(vertices, vertex);
-      continue;
-    }
-
-    int i = 0;
-    while (i < line.size())
-    {
-      if (line[i] == ' ')
-      {
-        i++;
-        continue;
-      }
-      count = 0;
-      while (i < line.size() && isdigit(line[i]))
-      {
-        count = count * 10 + (line[i] - '0');
-        i++;
-      }
-      i++;
-      vertices = max(vertices, count + 1);
-    }
-    vertex++;
-    vertices = max(vertices, vertex);
-  }
-  fp.close();
-  return vertices;
-}
+// -----------Graphs, represented with adjacency list (with vertices)-----------
 
 class Graph
 {
@@ -52,13 +14,16 @@ private:
   void add_the_edge_internal(int v, int w, bool directed);
   void remove_the_edge_internal(int v, int w, bool directed);
 
-  protected:
+protected:
   void check_the_vertex(int &vertex);
   void is_graph_directed(bool &directed);
 
 public:
-  Graph(int V);
-  int get_vertices();
+  Graph(int V) : V(V), adj(V) {};
+  int get_vertices()
+  {
+    return V;
+  }
   void read_graph_from_file();
   void print_graph();
   void add_the_edge();
@@ -66,13 +31,6 @@ public:
   void add_the_vertex();
   void remove_the_vertex();
 };
-
-Graph::Graph(int V) : V(V), adj(V) {};
-
-int Graph::get_vertices()
-{
-  return V;
-}
 
 void Graph::read_graph_from_file()
 {
@@ -258,11 +216,55 @@ void Graph::add_the_vertex()
   }
 }
 
+int count_vertices()
+{
+  int vertex = 0, vertices = -1, count = 0;
+  ifstream fp("graph_test.txt");
+  if (!fp.is_open())
+    return -1;
+  string line;
+  while (getline(fp, line))
+  {
+    if (line.empty())
+    {
+      vertex++;
+      vertices = max(vertices, vertex);
+      continue;
+    }
+
+    int i = 0;
+    while (i < line.size())
+    {
+      if (line[i] == ' ')
+      {
+        i++;
+        continue;
+      }
+      count = 0;
+      while (i < line.size() && isdigit(line[i]))
+      {
+        count = count * 10 + (line[i] - '0');
+        i++;
+      }
+      i++;
+      vertices = max(vertices, count + 1);
+    }
+    vertex++;
+    vertices = max(vertices, vertex);
+  }
+  fp.close();
+  return vertices;
+}
+
+// -----------Graphs, represented with adjacency matrix (with vertices)-----------
+
 class MatrixGraph : Graph
 {
 private:
   int Vertices;
   bool **adjMatrix;
+  void addEdge_internal(int v, int w, bool directed);
+  void removeEdge_internal(int v, int w, bool directed);
 
 public:
   MatrixGraph(int Vertices) : Graph(Vertices), Vertices(Vertices)
@@ -275,21 +277,142 @@ public:
         adjMatrix[i][j] = false;
     }
   }
-  
+  int getVertices()
+  {
+    return Vertices;
+  }
+  void read_matrix_from_file();
+  void print_matrix();
+  void print_list();
+  void addEdge_matrix();
+  void removeEdge_matrix();
+
+  ~MatrixGraph() {
+    for (int i = 0; i < Vertices; i++)
+      delete[] adjMatrix[i];
+    delete[] adjMatrix;
+  }
 };
+
+void MatrixGraph::read_matrix_from_file()
+{
+  ifstream fp("matrix_graph_test.txt");
+  if (!fp.is_open())
+  {
+    cout << "Cannot open the file." << endl;
+    return;
+  }
+
+  string line;
+  int vertex = 0;
+
+  while (getline(fp, line) && vertex < Vertices)
+  {
+    int adj_vertex = 0;
+    for (char ch : line)
+      if (ch == '1' || ch == '0')
+      {
+        if (ch == '1')
+          adjMatrix[vertex][adj_vertex] = true;
+        adj_vertex++;
+      }
+    vertex++;
+  }
+
+  fp.close();
+}
+
+void MatrixGraph::print_matrix()
+{
+  for (int i = 0; i < Vertices; i++)
+  {
+    for (int j = 0; j < Vertices; j++)
+      cout << adjMatrix[i][j] << " ";
+    cout << endl;
+  }
+}
+
+void MatrixGraph::print_list()
+{
+  for (int i = 0; i < Vertices; i++)
+  {
+    cout << "vertex " << i << ": ";
+    int check = 0;
+    for (int j = 0; j < Vertices; j++)
+      if (adjMatrix[i][j])
+      {
+        cout << j << " ";
+        check++;
+      }
+    if (check == 0)
+      cout << "∅";
+    cout << endl;
+  }
+}
+
+void MatrixGraph::addEdge_internal(int v, int w, bool directed)
+{
+  adjMatrix[v][w] = true;
+  if (!directed)
+    adjMatrix[w][v] = true;
+}
+
+void MatrixGraph::addEdge_matrix()
+{
+  int vertex1, vertex2;
+  bool directed, check = true;
+
+  cout << "Enter the two already existing vertexes between which you want to add an edge: ";
+
+  check_the_vertex(vertex1);
+  check_the_vertex(vertex2);
+
+  is_graph_directed(directed);
+
+  addEdge_internal(vertex1, vertex2, directed);
+}
+
+void MatrixGraph::removeEdge_internal(int v, int w, bool directed)
+{
+  adjMatrix[v][w] = false;
+  if (!directed)
+    adjMatrix[w][v] = false;
+}
+
+
+
+int count_matrix_vertices() // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
+{
+  ifstream fp("matrix_graph_test.txt");
+  if (!fp.is_open())
+  {
+    cout << "Cannot open the file." << endl;
+    return -1;
+  }
+
+  string line;
+  int vertices = 0;
+
+  getline(fp, line);
+
+  for (char ch : line)
+    if (ch == '1' || ch == '0')
+      vertices++;
+
+  fp.close();
+
+  return vertices;
+}
+
+// -----------Main function-----------
 
 int main()
 {
   int V = count_vertices();
   Graph graph(V);
-  MatrixGraph matrixGraph(3);
-  graph.read_graph_from_file();
-  int V1=graph.get_vertices();
-  cout<<V1<<"\n\n";
-  cout << "old graph:\n";
-  graph.print_graph();
-  // graph.add_the_vertex();
-  // cout << "\n\nnew graph:\n";
-  // graph.print_graph();
+  int Vertices = count_matrix_vertices();
+  MatrixGraph matrixGraph(Vertices);
+  matrixGraph.read_matrix_from_file();
+  matrixGraph.print_list();
   return 0;
 }

@@ -13,6 +13,15 @@
     "format": "cpp",
     "initializer_list": "cpp",
     "span": "cpp",
-    "text_encoding": "cpp"
+    "text_encoding": "cpp",
+    "fstream": "cpp",
+    "charconv": "cpp",
+    "optional": "cpp",
+    "ratio": "cpp",
+    "system_error": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp"
   }
 }
