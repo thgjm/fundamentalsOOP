@@ -4,6 +4,47 @@
 #include <algorithm>
 using namespace std;
 
+int count_vertices()
+{
+  int vertex = 0, vertices = -1, count = 0;
+  ifstream fp("graph_test.txt");
+  if (!fp.is_open())
+    return -1;
+  string line;
+  while (getline(fp, line))
+  {
+    if (line.empty())
+    {
+      vertex++;
+      vertices=max(vertices, vertex);
+      continue;
+    }
+
+    int i = 0;
+    while (i < line.size())
+    {
+      if (line[i] == ' ')
+      {
+        i++;
+        continue;
+      }
+      count = 0;
+      while (i < line.size() && isdigit(line[i]))
+      {
+        count = count * 10 + (line[i] - '0');
+        i++;
+      }
+      i++;
+      vertices = max(vertices, count + 1);
+    }
+    vertex++;
+    vertices = max(vertices, vertex);
+  }
+  fp.close();
+  cout << vertices << "\n\n";
+  return vertices;
+}
+
 class Graph
 {
 private:
@@ -14,6 +55,7 @@ private:
 
 public:
   Graph(int V);
+  int get_vertices();
   void read_graph_from_file();
   void print_graph();
   void add_the_edge();
@@ -21,9 +63,15 @@ public:
   void check_the_vertex(int &vertex);
   void is_graph_directed(bool &directed);
   void add_the_vertex();
+  void remove_the_vertex();
 };
 
 Graph::Graph(int V) : V(V), adj(V) {};
+
+int Graph::get_vertices()
+{
+  return V;
+}
 
 void Graph::read_graph_from_file()
 {
@@ -209,13 +257,14 @@ void Graph::add_the_vertex()
 
 int main()
 {
-  int V = 6;
+  int V = count_vertices();
   Graph graph(V);
+
   graph.read_graph_from_file();
   cout << "old graph:\n";
   graph.print_graph();
-  graph.add_the_vertex();
-  cout << "\n\nnew graph:\n";
-  graph.print_graph();
+  // graph.add_the_vertex();
+  // cout << "\n\nnew graph:\n";
+  // graph.print_graph();
   return 0;
 }
