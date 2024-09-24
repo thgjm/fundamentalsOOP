@@ -16,7 +16,7 @@ int count_vertices()
     if (line.empty())
     {
       vertex++;
-      vertices=max(vertices, vertex);
+      vertices = max(vertices, vertex);
       continue;
     }
 
@@ -41,7 +41,6 @@ int count_vertices()
     vertices = max(vertices, vertex);
   }
   fp.close();
-  cout << vertices << "\n\n";
   return vertices;
 }
 
@@ -53,6 +52,10 @@ private:
   void add_the_edge_internal(int v, int w, bool directed);
   void remove_the_edge_internal(int v, int w, bool directed);
 
+  protected:
+  void check_the_vertex(int &vertex);
+  void is_graph_directed(bool &directed);
+
 public:
   Graph(int V);
   int get_vertices();
@@ -60,8 +63,6 @@ public:
   void print_graph();
   void add_the_edge();
   void remove_the_edge();
-  void check_the_vertex(int &vertex);
-  void is_graph_directed(bool &directed);
   void add_the_vertex();
   void remove_the_vertex();
 };
@@ -82,6 +83,7 @@ void Graph::read_graph_from_file()
   string line;
   while (getline(fp, line) && vertex < V)
   {
+
     if (line.empty())
     {
       vertex++;
@@ -91,6 +93,7 @@ void Graph::read_graph_from_file()
     int i = 0;
     while (i < line.size())
     {
+      adj_vertex = 0;
       if (line[i] == ' ')
       {
         i++;
@@ -102,7 +105,7 @@ void Graph::read_graph_from_file()
         i++;
       }
       adj[vertex].push_back(adj_vertex);
-      adj_vertex = 0;
+
       i++;
     }
     vertex++;
@@ -255,12 +258,34 @@ void Graph::add_the_vertex()
   }
 }
 
+class MatrixGraph : Graph
+{
+private:
+  int Vertices;
+  bool **adjMatrix;
+
+public:
+  MatrixGraph(int Vertices) : Graph(Vertices), Vertices(Vertices)
+  {
+    adjMatrix = new bool *[Vertices];
+    for (int i = 0; i < Vertices; i++)
+    {
+      adjMatrix[i] = new bool[Vertices];
+      for (int j = 0; j < Vertices; j++)
+        adjMatrix[i][j] = false;
+    }
+  }
+  
+};
+
 int main()
 {
   int V = count_vertices();
   Graph graph(V);
-
+  MatrixGraph matrixGraph(3);
   graph.read_graph_from_file();
+  int V1=graph.get_vertices();
+  cout<<V1<<"\n\n";
   cout << "old graph:\n";
   graph.print_graph();
   // graph.add_the_vertex();
