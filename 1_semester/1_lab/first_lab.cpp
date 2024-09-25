@@ -11,6 +11,7 @@ class Graph
 private:
   int V;
   vector<vector<int>> adj;
+  string fileName;
   void add_the_edge_internal(int v, int w, bool directed);
   void remove_the_edge_internal(int v, int w, bool directed);
 
@@ -19,7 +20,7 @@ protected:
   void is_graph_directed(bool &directed);
 
 public:
-  Graph(int V) : V(V), adj(V) {};
+  Graph(int V, string fileName) : V(V), adj(V), fileName(fileName) {};
   int get_vertices()
   {
     return V;
@@ -37,9 +38,13 @@ public:
 void Graph::read_graph_from_file()
 {
   int adj_vertex = 0, vertex = 0;
-  ifstream fp("graph_test.txt");
+  ifstream fp(fileName);
   if (!fp.is_open())
+  {
+    cout << "Cannot open the file.";
     return;
+  }
+
   string line;
   while (getline(fp, line) && vertex < V)
   {
@@ -220,23 +225,23 @@ void Graph::add_the_vertex()
 
 Graph Graph::complementGraph()
 {
-  Graph complementGraph(V);
+  Graph complementGraph(V, fileName);
   for (int v = 0; v < V; v++)
   {
     int vertices_array[V] = {0};
     for (auto i = adj[v].begin(); i != adj[v].end(); i++)
       vertices_array[*i] = 1;
     for (int j = 0; j < V; j++)
-      if (v!=j && vertices_array[j] == 0)
+      if (v != j && vertices_array[j] == 0)
         complementGraph.add_the_edge_internal(v, j, true);
   }
   return complementGraph;
 }
 
-int count_vertices()
+int count_vertices(string filename)
 {
   int vertex = 0, vertices = -1, count = 0;
-  ifstream fp("graph_test.txt");
+  ifstream fp(filename);
   if (!fp.is_open())
     return -1;
   string line;
@@ -282,9 +287,9 @@ private:
   bool **adjMatrix;
   void addEdge_internal(int v, int w, bool directed);
   void removeEdge_internal(int v, int w, bool directed);
-
+  string FileName;
 public:
-  MatrixGraph(int Vertices) : Graph(Vertices), Vertices(Vertices)
+  MatrixGraph(int Vertices, string filename) : Graph(Vertices, filename), Vertices(Vertices), FileName(filename)
   {
     adjMatrix = new bool *[Vertices];
     for (int i = 0; i < Vertices; i++)
@@ -316,7 +321,7 @@ public:
 
 MatrixGraph MatrixGraph::complementMatrixGraph()
 {
-  MatrixGraph complementGraph(Vertices);
+  MatrixGraph complementGraph(Vertices, FileName);
   for (int i = 0; i < Vertices; i++)
     for (int j = 0; j < Vertices; j++)
     {
@@ -434,20 +439,31 @@ int count_matrix_vertices() // since the adjacency matrix should be square - it 
   return vertices;
 }
 
+string enter_filename()
+{
+  string filename;
+  cout<<"Enter the file name: ";
+  cin>>filename;
+  cout<<endl;
+  return filename;
+} 
+
 // -----------Main function-----------
 
 int main()
 {
-  int V = count_vertices();
-  Graph graph(V);
+  string graph_file=enter_filename();
+  int V = count_vertices(graph_file);
+  Graph graph(V, graph_file);
   graph.read_graph_from_file();
   cout << "og graph:\n";
   graph.print_graph();
   Graph complementGraph = graph.complementGraph();
   cout << "complement graph:\n";
   complementGraph.print_graph();
-  /*int Vertices = count_matrix_vertices();
-  MatrixGraph matrixGraph(Vertices);
+  /*string matrix_file=enter_filename();
+  int Vertices = count_matrix_vertices();
+  MatrixGraph matrixGraph(Vertices, matrix_file);
   matrixGraph.read_matrix_from_file();
   cout << "og graph:\n";
   matrixGraph.print_matrix();
