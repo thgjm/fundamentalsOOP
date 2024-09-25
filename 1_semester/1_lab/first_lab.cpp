@@ -3,6 +3,9 @@
 #include <fstream>
 #include <algorithm>
 
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+#include "doctest.h"
+
 using namespace std;
 
 // -----------Graphs, represented with adjacency list (with vertices)-----------
@@ -15,6 +18,7 @@ private:
   string fileName;
   void add_the_edge_internal(int v, int w, bool directed);
   void remove_the_edge_internal(int v, int w, bool directed);
+  void remove_the_vertex_internal(int v);
   void DFS(int v, bool visited[]);
 
 protected:
@@ -32,9 +36,11 @@ public:
   void add_the_edge();
   void remove_the_edge();
   void add_the_vertex();
-  void remove_the_vertex(); // not yet implemented
+  void remove_the_vertex();
 
   bool isConnected();
+
+  string graph_to_string();
 
   Graph complementGraph();
 };
@@ -227,6 +233,35 @@ void Graph::add_the_vertex()
   }
 }
 
+void Graph::remove_the_vertex_internal(int v)
+{
+  for (int i = 0; i < V; i++)
+  {
+    auto it = find(adj[i].begin(), adj[i].end(), v);
+    if (it != adj[i].end())
+      adj[i].erase(it);
+  }
+
+  adj.erase(adj.begin() + v);
+
+  for (int i = 0; i < V - 1; i++)
+    for (auto w = adj[i].begin(); w != adj[i].end(); w++)
+      if (*w > v)
+        (*w)--;
+
+  V--;
+}
+
+void Graph::remove_the_vertex()
+{
+  int vertex;
+  cout << "Enter the vertex you want to remove: ";
+
+  check_the_vertex(vertex);
+
+  remove_the_vertex_internal(vertex);
+}
+
 Graph Graph::complementGraph()
 {
   Graph complementGraph(V, fileName);
@@ -242,8 +277,6 @@ Graph Graph::complementGraph()
   return complementGraph;
 }
 
-
-
 void Graph::DFS(int v, bool visited[])
 {
   visited[v] = true;
@@ -256,7 +289,7 @@ void Graph::DFS(int v, bool visited[])
 bool Graph::isConnected()
 {
   bool *visited = new bool[V];
-  for (int v; v < V; v++)
+  for (int v = 0; v < V; v++)
   {
     for (int i = 0; i < V; i++)
       visited[i] = false;
@@ -268,7 +301,22 @@ bool Graph::isConnected()
   return true;
 }
 
-
+string Graph::graph_to_string()
+{
+  ostringstream oss;
+  for (int v = 0; v < V; v++)
+  {
+    oss << "vertex " << v << ": ";
+    for (size_t i = 0; i < adj[v].size(); i++)
+    {
+      oss << adj[v][i];
+      if (i < adj[v].size() - 1)
+        oss << " ";
+    }
+    oss << "\n";
+  }
+  return oss.str();
+}
 
 int count_vertices(string filename)
 {
@@ -317,10 +365,12 @@ class MatrixGraph : Graph
 private:
   int Vertices;
   bool **adjMatrix;
+  string FileName;
+
   void addEdge_internal(int v, int w, bool directed);
   void removeEdge_internal(int v, int w, bool directed);
   void removeVertex_internal(int v);
-  string FileName;
+  void DFS(int active, bool visited[]);
 
 public:
   MatrixGraph(int Vertices, string filename) : Graph(Vertices, filename), Vertices(Vertices), FileName(filename)
@@ -344,7 +394,14 @@ public:
   void removeEdge_matrix();
   void removeVertex_matrix();
 
+  bool isConnected_matrix();
+
   MatrixGraph complementMatrixGraph();
+
+  bool **getAdjMatrix()
+  {
+    return adjMatrix;
+  }
 
   ~MatrixGraph()
   {
@@ -477,6 +534,29 @@ void MatrixGraph::removeVertex_matrix()
   removeVertex_internal(vertex1);
 }
 
+void MatrixGraph::DFS(int active, bool visited[])
+{
+  visited[active] = true;
+  for (int i = 0; i < Vertices; i++)
+    if (adjMatrix[active][i] == 1 && !visited[i])
+      DFS(i, visited);
+}
+
+bool MatrixGraph::isConnected_matrix()
+{
+  bool *visited = new bool[Vertices];
+  for (int v = 0; v < Vertices; v++)
+  {
+    for (int i = 0; i < Vertices; i++)
+      visited[i] = false;
+    DFS(v, visited);
+    for (int i = 0; i < Vertices; i++)
+      if (!visited[i])
+        return false;
+  }
+  return true;
+}
+
 int count_matrix_vertices(string fileName) // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
 {
   ifstream fp(fileName);
@@ -511,16 +591,16 @@ string enter_filename()
 
 // -----------Main function-----------
 
-int main()
+/*int main()
 {
-  //string graph_file = enter_filename();
+  // string graph_file = enter_filename();
   int V = count_vertices("graph_test.txt");
   Graph graph(V, "graph_test.txt");
   graph.read_graph_from_file();
   cout << "og graph:\n";
   graph.print_graph();
-  cout<<endl<<endl<<graph.isConnected();
-  //string matrix_file=enter_filename();
+  cout<<graph.isConnected();
+  // string matrix_file=enter_filename();
   /*int Vertices = count_matrix_vertices(matrix_file);
   MatrixGraph matrixGraph(Vertices, "matrix_graph_test.txt");
   matrixGraph.read_matrix_from_file();
@@ -529,5 +609,81 @@ int main()
   matrixGraph.removeVertex_matrix();
   cout << "new graph:\n";
   matrixGraph.print_matrix();
-  return 0;*/
+  return 0;
+}*/
+
+
+// -----------Testing-----------
+
+
+TEST_CASE("is adjList graph connected?")
+{
+  string filename;
+  filename = "graph_test.txt";
+  int V = count_vertices(filename);
+  Graph graph(V, filename);
+  graph.read_graph_from_file();
+  CHECK(graph.isConnected() == true);
+}
+
+TEST_CASE("check adjList complemented graphs.")
+{
+  string filename;
+  filename = "graph_test.txt";
+  int V = count_vertices(filename);
+  Graph graph(V, filename);
+  graph.read_graph_from_file();
+  Graph complementGraph = graph.complementGraph();
+
+  string result = complementGraph.graph_to_string();
+
+  string expectedOutput =
+      "vertex 0: 4 5\n"
+      "vertex 1: 3 4 5\n"
+      "vertex 2: 3 5\n"
+      "vertex 3: 1 2 4 5\n"
+      "vertex 4: 0 1 3\n"
+      "vertex 5: 0 1 2 3\n";
+
+  CHECK(result == expectedOutput);
+}
+
+TEST_CASE("is adjMatr graph connected?")
+{
+  string filename;
+  filename = "matrix_graph_test.txt";
+  int V = count_matrix_vertices(filename);
+  MatrixGraph graph(V, filename);
+  graph.read_matrix_from_file();
+  CHECK(graph.isConnected_matrix() == true);
+}
+
+TEST_CASE("check adjMatr complemented graphs.")
+{
+  string filename = "matrix_graph_test.txt";
+  int V = count_matrix_vertices(filename);
+  MatrixGraph graph(V, filename);
+  graph.read_matrix_from_file();
+
+  MatrixGraph complementGraph = graph.complementMatrixGraph();
+
+  bool expectedMatrix[6][6] =
+      {
+          {0, 1, 1, 1, 0, 0},
+          {1, 0, 1, 0, 0, 0},
+          {1, 1, 0, 0, 1, 0},
+          {1, 0, 0, 0, 0, 0},
+          {0, 0, 1, 0, 0, 1},
+          {0, 0, 0, 0, 1, 0}};
+  bool **adjComplementMatr = complementGraph.getAdjMatrix();
+  bool **adjMatr = graph.getAdjMatrix();
+  for (int i = 0; i < V; ++i)
+    for (int j = 0; j < V; ++j)
+      if (i != j)
+      {
+        if(adjMatr[i][j] == false)
+          CHECK(adjComplementMatr[i][j]==true);
+        else
+          CHECK(adjComplementMatr[i][j]==false);
+      }
 }
