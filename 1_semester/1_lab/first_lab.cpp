@@ -616,24 +616,19 @@ string enter_filename()
 // -----------Testing-----------
 
 
-TEST_CASE("is adjList graph connected?")
+TEST_CASE("Testing functions for Graph class.")
 {
-  string filename;
-  filename = "graph_test.txt";
+  string filename = "graph_test.txt";
   int V = count_vertices(filename);
   Graph graph(V, filename);
   graph.read_graph_from_file();
-  CHECK(graph.isConnected() == true);
-}
-
-TEST_CASE("check adjList complemented graphs.")
-{
-  string filename;
-  filename = "graph_test.txt";
-  int V = count_vertices(filename);
-  Graph graph(V, filename);
-  graph.read_graph_from_file();
-  Graph complementGraph = graph.complementGraph();
+  SUBCASE("Is graph connected?")
+  {
+    CHECK(graph.isConnected() == true);
+  }
+  SUBCASE("Check complemented graph.")
+  {
+    Graph complementGraph = graph.complementGraph();
 
   string result = complementGraph.graph_to_string();
 
@@ -646,26 +641,24 @@ TEST_CASE("check adjList complemented graphs.")
       "vertex 5: 0 1 2 3\n";
 
   CHECK(result == expectedOutput);
+  }
 }
 
-TEST_CASE("is adjMatr graph connected?")
-{
-  string filename;
-  filename = "matrix_graph_test.txt";
-  int V = count_matrix_vertices(filename);
-  MatrixGraph graph(V, filename);
-  graph.read_matrix_from_file();
-  CHECK(graph.isConnected_matrix() == true);
-}
 
-TEST_CASE("check adjMatr complemented graphs.")
+
+TEST_CASE("Testing functions for MatrixGraph class.")
 {
   string filename = "matrix_graph_test.txt";
   int V = count_matrix_vertices(filename);
   MatrixGraph graph(V, filename);
   graph.read_matrix_from_file();
-
-  MatrixGraph complementGraph = graph.complementMatrixGraph();
+  SUBCASE("Is graph connected?")
+  {
+    CHECK(graph.isConnected_matrix() == true);
+  }
+  SUBCASE("Check complemented graph.")
+  {
+    MatrixGraph complementGraph = graph.complementMatrixGraph();
 
   bool expectedMatrix[6][6] =
       {
@@ -686,4 +679,5 @@ TEST_CASE("check adjMatr complemented graphs.")
         else
           CHECK(adjComplementMatr[i][j]==false);
       }
+  }
 }
