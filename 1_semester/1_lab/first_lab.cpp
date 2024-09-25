@@ -15,6 +15,7 @@ private:
   string fileName;
   void add_the_edge_internal(int v, int w, bool directed);
   void remove_the_edge_internal(int v, int w, bool directed);
+  void DFS(int v, bool visited[]);
 
 protected:
   void check_the_vertex(int &vertex);
@@ -32,6 +33,8 @@ public:
   void remove_the_edge();
   void add_the_vertex();
   void remove_the_vertex(); // not yet implemented
+
+  bool isConnected();
 
   Graph complementGraph();
 };
@@ -239,6 +242,34 @@ Graph Graph::complementGraph()
   return complementGraph;
 }
 
+
+
+void Graph::DFS(int v, bool visited[])
+{
+  visited[v] = true;
+
+  for (auto i = adj[v].begin(); i != adj[v].end(); i++)
+    if (!visited[*i])
+      DFS(*i, visited);
+}
+
+bool Graph::isConnected()
+{
+  bool *visited = new bool[V];
+  for (int v; v < V; v++)
+  {
+    for (int i = 0; i < V; i++)
+      visited[i] = false;
+    DFS(v, visited);
+    for (int i = 0; i < V; i++)
+      if (!visited[i])
+        return false;
+  }
+  return true;
+}
+
+
+
 int count_vertices(string filename)
 {
   int vertex = 0, vertices = -1, count = 0;
@@ -422,16 +453,16 @@ void MatrixGraph::removeEdge_internal(int v, int w, bool directed)
 
 void MatrixGraph::removeVertex_internal(int v)
 {
-    while (v < Vertices)
-    {
-      for (int i = 0; i < Vertices; ++i)
-        adjMatrix[i][v] = adjMatrix[i][v];
+  while (v < Vertices)
+  {
+    for (int i = 0; i < Vertices; ++i)
+      adjMatrix[i][v] = adjMatrix[i][v];
 
-      for (int i = 0; i < Vertices; ++i)
-        adjMatrix[v][i] = adjMatrix[v][i];
-      v++;
-    }
-    Vertices--;
+    for (int i = 0; i < Vertices; ++i)
+      adjMatrix[v][i] = adjMatrix[v][i];
+    v++;
+  }
+  Vertices--;
 }
 
 void MatrixGraph::removeVertex_matrix()
@@ -446,9 +477,9 @@ void MatrixGraph::removeVertex_matrix()
   removeVertex_internal(vertex1);
 }
 
-int count_matrix_vertices() // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
+int count_matrix_vertices(string fileName) // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
 {
-  ifstream fp("matrix_graph_test.txt");
+  ifstream fp(fileName);
   if (!fp.is_open())
   {
     cout << "Cannot open the file." << endl;
@@ -482,17 +513,15 @@ string enter_filename()
 
 int main()
 {
-  /*string graph_file = enter_filename();
-  int V = count_vertices(graph_file);
-  Graph graph(V, graph_file);
+  //string graph_file = enter_filename();
+  int V = count_vertices("graph_test.txt");
+  Graph graph(V, "graph_test.txt");
   graph.read_graph_from_file();
   cout << "og graph:\n";
   graph.print_graph();
-  Graph complementGraph = graph.complementGraph();
-  cout << "complement graph:\n";
-  complementGraph.print_graph();*/
+  cout<<endl<<endl<<graph.isConnected();
   //string matrix_file=enter_filename();
-  int Vertices = count_matrix_vertices();
+  /*int Vertices = count_matrix_vertices(matrix_file);
   MatrixGraph matrixGraph(Vertices, "matrix_graph_test.txt");
   matrixGraph.read_matrix_from_file();
   cout << "og graph:\n";
@@ -500,5 +529,5 @@ int main()
   matrixGraph.removeVertex_matrix();
   cout << "new graph:\n";
   matrixGraph.print_matrix();
-  return 0;
+  return 0;*/
 }
