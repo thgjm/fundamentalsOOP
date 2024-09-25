@@ -2,6 +2,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+
 using namespace std;
 
 // -----------Graphs, represented with adjacency list (with vertices)-----------
@@ -287,7 +288,9 @@ private:
   bool **adjMatrix;
   void addEdge_internal(int v, int w, bool directed);
   void removeEdge_internal(int v, int w, bool directed);
+  void removeVertex_internal(int v);
   string FileName;
+
 public:
   MatrixGraph(int Vertices, string filename) : Graph(Vertices, filename), Vertices(Vertices), FileName(filename)
   {
@@ -308,6 +311,7 @@ public:
   void print_list();
   void addEdge_matrix();
   void removeEdge_matrix();
+  void removeVertex_matrix();
 
   MatrixGraph complementMatrixGraph();
 
@@ -416,6 +420,32 @@ void MatrixGraph::removeEdge_internal(int v, int w, bool directed)
     adjMatrix[w][v] = false;
 }
 
+void MatrixGraph::removeVertex_internal(int v)
+{
+    while (v < Vertices)
+    {
+      for (int i = 0; i < Vertices; ++i)
+        adjMatrix[i][v] = adjMatrix[i][v];
+
+      for (int i = 0; i < Vertices; ++i)
+        adjMatrix[v][i] = adjMatrix[v][i];
+      v++;
+    }
+    Vertices--;
+}
+
+void MatrixGraph::removeVertex_matrix()
+{
+  int vertex1, vertex2;
+  bool directed, check = true;
+
+  cout << "Enter the vertex you want to remove: ";
+
+  check_the_vertex(vertex1);
+
+  removeVertex_internal(vertex1);
+}
+
 int count_matrix_vertices() // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
 {
   ifstream fp("matrix_graph_test.txt");
@@ -442,17 +472,17 @@ int count_matrix_vertices() // since the adjacency matrix should be square - it 
 string enter_filename()
 {
   string filename;
-  cout<<"Enter the file name: ";
-  cin>>filename;
-  cout<<endl;
+  cout << "Enter the file name: ";
+  cin >> filename;
+  cout << endl;
   return filename;
-} 
+}
 
 // -----------Main function-----------
 
 int main()
 {
-  string graph_file=enter_filename();
+  /*string graph_file = enter_filename();
   int V = count_vertices(graph_file);
   Graph graph(V, graph_file);
   graph.read_graph_from_file();
@@ -460,15 +490,15 @@ int main()
   graph.print_graph();
   Graph complementGraph = graph.complementGraph();
   cout << "complement graph:\n";
-  complementGraph.print_graph();
-  /*string matrix_file=enter_filename();
+  complementGraph.print_graph();*/
+  //string matrix_file=enter_filename();
   int Vertices = count_matrix_vertices();
-  MatrixGraph matrixGraph(Vertices, matrix_file);
+  MatrixGraph matrixGraph(Vertices, "matrix_graph_test.txt");
   matrixGraph.read_matrix_from_file();
   cout << "og graph:\n";
   matrixGraph.print_matrix();
-  MatrixGraph complementGraph_matrix = matrixGraph.complementMatrixGraph();
-  cout << "complement graph:\n";
-  complementGraph_matrix.print_matrix();*/
+  matrixGraph.removeVertex_matrix();
+  cout << "new graph:\n";
+  matrixGraph.print_matrix();
   return 0;
 }
