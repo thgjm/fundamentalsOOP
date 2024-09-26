@@ -1,7 +1,7 @@
-#include "graphs.h"
+#include "classes/IncendenceMatrixGraph.h"
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include "doctest.h"
+#include "classes/doctest.h"
 
 // -----------Testing-----------
 
