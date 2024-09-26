@@ -26,8 +26,6 @@ int main()
   cout<<"og graph:\n";
   incMatrGraph.printIncMatrix();
   cout<<endl;
-  incMatrGraph.removeVertex_incMatrix();
-  cout<<"\nnew graph:\n";
-  incMatrGraph.printIncMatrix();
+  incMatrGraph.findSpanningTree_matrix(0);
   return 0;
 }

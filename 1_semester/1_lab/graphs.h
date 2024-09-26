@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream>
 #include <stack>
+#include <queue>
+#include <limits>
 
 using namespace std;
 
@@ -132,7 +134,7 @@ private:
   void removeEdge_internal(int v, int w, bool directed);
   void removeVertex_internal(int v);
   void plusOneEdge();
-  void DFS(int active, bool visited[]);
+  void DFS(int vertex, vector<bool> &visited);
 
   bool is_directed();
 
@@ -155,6 +157,11 @@ public:
     return Vertexes;
   }
 
+  int getEdges()
+  {
+    return Edges;
+  }
+
   void readFromFile();
   void printIncMatrix();
   void printList();
@@ -165,7 +172,7 @@ public:
   void addVertex_incMatrix();
   void removeVertex_incMatrix();
 
-  bool isConnected_incMatrix();
+  bool isConnected_incMatrix(); // for undirected only
 
   int shortestPath_incMatrix(int start, int end);
 
@@ -1231,6 +1238,112 @@ void IncendenceMatrixGraph::removeVertex_incMatrix()
   check_the_vertex(vertex1);
 
   removeVertex_internal(vertex1);
+}
+
+bool IncendenceMatrixGraph::isConnected_incMatrix()
+{
+
+  for (int v = 0; v < Vertexes; v++)
+  {
+    vector<bool> visited(Vertexes, false);
+    DFS(v, visited);
+    for (bool v : visited)
+      if (!v)
+        return false;
+  }
+
+  return true;
+}
+
+void IncendenceMatrixGraph::DFS(int vertex, vector<bool> &visited)
+{
+  visited[vertex] = true;
+
+  for (int edge = 0; edge < Edges; edge++)
+    if (incMatrix[vertex][edge] != 0)
+      for (int otherVertex = 0; otherVertex < Vertexes; otherVertex++)
+        if (otherVertex != vertex && incMatrix[otherVertex][edge] != 0)
+          if (!visited[otherVertex])
+            DFS(otherVertex, visited);
+}
+
+IncendenceMatrixGraph IncendenceMatrixGraph::complementMatrixGraph()
+{
+  int totalEdges = Vertexes * (Vertexes - 1) / 2;
+  int complementGraphEdges = totalEdges - Edges;
+  IncendenceMatrixGraph complementGraph(Vertexes, complementGraphEdges, filename);
+
+  int edgeIndex = 0;
+  for (int i = 0; i < Vertexes; i++)
+    for (int j = i + 1; j < Vertexes; j++)
+      if (!are_vertexes_connected(i, j))
+      {
+        complementGraph.incMatrix[i][edgeIndex] = 1;
+        complementGraph.incMatrix[j][edgeIndex] = 1;
+        edgeIndex++;
+      }
+  return complementGraph;
+}
+
+int IncendenceMatrixGraph::shortestPath_incMatrix(int start, int end)
+{
+  if (start < 0 || start >= Vertexes || end < 0 || end >= Vertexes)
+  {
+    cout << "Invalid vertex index." << endl;
+    return -1;
+  }
+
+  vector<int> distance(Vertexes, -2);
+  distance[start] = 0;
+
+  queue<int> q;
+  q.push(start);
+  while (!q.empty())
+  {
+    int current = q.front();
+    q.pop();
+
+    for (int edge = 0; edge < Edges; edge++)
+      if (incMatrix[current][edge] != 0)
+        for (int otherVertex = 0; otherVertex < Vertexes; otherVertex++)
+          if ((incMatrix[otherVertex][edge] != 0 && otherVertex != current) && distance[otherVertex] == -2)
+          {
+            distance[otherVertex] = distance[current] + 1;
+            q.push(otherVertex);
+
+            if (otherVertex == end)
+              return distance[otherVertex];
+          }
+  }
+  return -1;
+}
+
+void IncendenceMatrixGraph::findSpanningTree_matrix(int start)
+{
+    vector<bool> visited(Vertexes, false);
+    vector<int> tree(Vertexes, -1);
+    stack<int> st;
+
+    st.push(start);
+    visited[start] = true;
+
+    while (!st.empty())
+    {
+        int u = st.top();
+        st.pop();
+
+        for (int edge = 0; edge < Edges; edge++)
+            if (incMatrix[u][edge] != 0)
+                for (int v = 0; v < Vertexes; v++)
+                    if (incMatrix[v][edge] != 0 && v != u && !visited[v])
+                    {
+                        visited[v] = true; 
+                        tree[v] = u;
+                        st.push(v);
+                    }
+    }
+
+    printSpanningTree(start, tree);
 }
 
 int count_vertices_edges(string fileName, int &edges)

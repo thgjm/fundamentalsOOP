@@ -13,7 +13,7 @@ TEST_CASE("Testing functions for Graph class.")
   graph.read_graph_from_file();
 
   SUBCASE("Is graph connected?")
-    CHECK(graph.isConnected() == true);
+  CHECK(graph.isConnected() == true);
 
   SUBCASE("Check complemented graph.")
   {
@@ -35,14 +35,12 @@ TEST_CASE("Testing functions for Graph class.")
   SUBCASE("Check shortest path.")
   {
     SUBCASE("Between 0 and 1.")
-      CHECK(graph.shortest_path(0, 1) == 1);
+    CHECK(graph.shortest_path(0, 1) == 1);
 
     SUBCASE("Between 0 and 5.")
-      CHECK(graph.shortest_path(0, 5) == 3);
+    CHECK(graph.shortest_path(0, 5) == 3);
   }
 }
-
-
 
 TEST_CASE("Testing functions for MatrixGraph class.")
 {
@@ -52,20 +50,12 @@ TEST_CASE("Testing functions for MatrixGraph class.")
   graph.read_matrix_from_file();
 
   SUBCASE("Is graph connected?")
-    CHECK(graph.isConnected_matrix() == true);
+  CHECK(graph.isConnected_matrix() == true);
 
   SUBCASE("Check complemented graph.")
   {
     MatrixGraph complementGraph = graph.complementMatrixGraph();
 
-    bool expectedMatrix[6][6] =
-        {
-            {0, 1, 1, 1, 0, 0},
-            {1, 0, 1, 0, 0, 0},
-            {1, 1, 0, 0, 1, 0},
-            {1, 0, 0, 0, 0, 0},
-            {0, 0, 1, 0, 0, 1},
-            {0, 0, 0, 0, 1, 0}};
     bool **adjComplementMatr = complementGraph.getAdjMatrix();
     bool **adjMatr = graph.getAdjMatrix();
     for (int i = 0; i < V; ++i)
@@ -82,9 +72,46 @@ TEST_CASE("Testing functions for MatrixGraph class.")
   SUBCASE("Check shortest path.")
   {
     SUBCASE("Between 0 and 1.")
-      CHECK(graph.shortestPath_matrix(0, 1) == 1);
+    CHECK(graph.shortestPath_matrix(0, 1) == 1);
 
     SUBCASE("Between 0 and 5.")
-      CHECK(graph.shortestPath_matrix(0, 5) == 3);
+    CHECK(graph.shortestPath_matrix(0, 5) == 3);
+  }
+}
+
+TEST_CASE("Testing functions for IncendenceMatrixGraph class.")
+{
+  string filename = "incendence_matrix_graph_test.txt";
+  int edges;
+  int vertices = count_vertices_edges(filename, edges);
+  IncendenceMatrixGraph graph(vertices, edges, filename);
+  graph.readFromFile();
+
+  SUBCASE("Is graph connected?")
+  CHECK(graph.isConnected_incMatrix() == true);
+  SUBCASE("Complemented graph.")
+  {
+    IncendenceMatrixGraph complementGraph = graph.complementMatrixGraph();
+
+    int expectedMatrix[6][9] =
+        {
+            {1, 1, 0, 0, 0, 0, 0, 0, 0},
+            {0, 0, 1, 1, 1, 0, 0, 0, 0},
+            {0, 0, 0, 0, 0, 1, 1, 0, 0},
+            {0, 0, 1, 0, 0, 1, 0, 1, 1},
+            {1, 0, 0, 1, 0, 0, 0, 1, 0},
+            {0, 1, 0, 0, 1, 0, 1, 0, 1}};
+
+    for (int i = 0; i < complementGraph.getVertexes(); i++)
+      for (int j = 0; j < complementGraph.getEdges(); j++)
+        CHECK(complementGraph.getIncMatrix()[i][j] == expectedMatrix[i][j]);
+  }
+  SUBCASE("Check shortest path.")
+  {
+    SUBCASE("Between 0 and 1.")
+    CHECK(graph.shortestPath_incMatrix(0, 1) == 1);
+
+    SUBCASE("Between 3 and 5.")
+    CHECK(graph.shortestPath_incMatrix(3, 5) == 4);
   }
 }
