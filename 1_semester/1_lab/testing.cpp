@@ -11,10 +11,10 @@ TEST_CASE("Testing functions for Graph class.")
   int V = count_vertices(filename);
   Graph graph(V, filename);
   graph.read_graph_from_file();
+
   SUBCASE("Is graph connected?")
-  {
     CHECK(graph.isConnected() == true);
-  }
+
   SUBCASE("Check complemented graph.")
   {
     Graph complementGraph = graph.complementGraph();
@@ -31,7 +31,18 @@ TEST_CASE("Testing functions for Graph class.")
 
     CHECK(result == expectedOutput);
   }
+
+  SUBCASE("Check shortest path.")
+  {
+    SUBCASE("Between 0 and 1.")
+      CHECK(graph.shortest_path(0, 1) == 1);
+
+    SUBCASE("Between 0 and 5.")
+      CHECK(graph.shortest_path(0, 5) == 3);
+  }
 }
+
+
 
 TEST_CASE("Testing functions for MatrixGraph class.")
 {
@@ -39,10 +50,10 @@ TEST_CASE("Testing functions for MatrixGraph class.")
   int V = count_matrix_vertices(filename);
   MatrixGraph graph(V, filename);
   graph.read_matrix_from_file();
+
   SUBCASE("Is graph connected?")
-  {
     CHECK(graph.isConnected_matrix() == true);
-  }
+
   SUBCASE("Check complemented graph.")
   {
     MatrixGraph complementGraph = graph.complementMatrixGraph();
@@ -66,5 +77,14 @@ TEST_CASE("Testing functions for MatrixGraph class.")
           else
             CHECK(adjComplementMatr[i][j] == false);
         }
+  }
+
+  SUBCASE("Check shortest path.")
+  {
+    SUBCASE("Between 0 and 1.")
+      CHECK(graph.shortestPath_matrix(0, 1) == 1);
+
+    SUBCASE("Between 0 and 5.")
+      CHECK(graph.shortestPath_matrix(0, 5) == 3);
   }
 }

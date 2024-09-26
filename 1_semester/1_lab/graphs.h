@@ -9,8 +9,6 @@ using namespace std;
 
 //----------------------Classes----------------------
 
-
-
 // -----------Graphs, represented with adjacency list (with vertices)-----------
 
 class Graph
@@ -50,9 +48,9 @@ public:
   string graph_to_string();
 
   Graph complementGraph();
+
+  int shortest_path(int start, int end);
 };
-
-
 
 // -----------Graphs, represented with adjacency matrix (with vertices)-----------
 
@@ -97,6 +95,8 @@ public:
 
   bool isConnected_matrix();
 
+  int shortestPath_matrix(int start, int end);
+
   MatrixGraph complementMatrixGraph();
 
   bool **getAdjMatrix()
@@ -112,11 +112,7 @@ public:
   }
 };
 
-
-
 //----------------------Functions----------------------
-
-
 
 string enter_filename()
 {
@@ -127,9 +123,7 @@ string enter_filename()
   return filename;
 }
 
-
 // -----------Functions for "Graph"-----------
-
 
 void Graph::read_graph_from_file()
 {
@@ -384,6 +378,7 @@ bool Graph::isConnected()
       if (!visited[i])
         return false;
   }
+  delete[] visited;
   return true;
 }
 
@@ -403,6 +398,49 @@ string Graph::graph_to_string()
   }
   return oss.str();
 }
+
+int Graph::shortest_path(int start, int end)
+{
+  if (start < 0 || start >= V || end < 0 || end >= V)
+  {
+    cout << "Incorrect input." << endl;
+    return -1;
+  }
+
+  if (start == end)
+    return 0;
+
+  vector<bool> visited(V, false);
+  vector<int> distance(V, -1);
+
+  vector<int> queue;
+  visited[start] = true;
+  distance[start] = 0;
+  queue.push_back(start);
+
+  while (!queue.empty())
+  {
+    int current = queue.front();
+    queue.erase(queue.begin());
+
+    for (int i : adj[current])
+    {
+      if (!visited[i])
+      {
+        visited[i] = true;
+        distance[i] = distance[current] + 1;
+
+        if (i == end)
+          return distance[i];
+
+        queue.push_back(i);
+      }
+    }
+  }
+
+  return -1;
+}
+
 
 int count_vertices(string filename)
 {
@@ -444,9 +482,7 @@ int count_vertices(string filename)
   return vertices;
 }
 
-
 // -----------Functions for "MatrixGraph"-----------
-
 
 MatrixGraph MatrixGraph::complementMatrixGraph()
 {
@@ -571,11 +607,10 @@ void MatrixGraph::addVertex_matrix()
     for (int j = 0; j < Vertices; ++j)
       newAdjMatrix[i][j] = adjMatrix[i][j];
 
-  
   for (int i = 0; i < newVerticesCount; ++i)
   {
-    newAdjMatrix[Vertices][i] = false; 
-    newAdjMatrix[i][Vertices] = false; 
+    newAdjMatrix[Vertices][i] = false;
+    newAdjMatrix[i][Vertices] = false;
   }
 
   for (int i = 0; i < Vertices; ++i)
@@ -662,6 +697,46 @@ bool MatrixGraph::isConnected_matrix()
   }
   return true;
 }
+
+int MatrixGraph::shortestPath_matrix(int start, int end)
+{
+  if (start < 0 || start >= Vertices || end < 0 || end >= Vertices)
+  {
+    cout << "Incorrect input" << endl;
+    return -1;
+  }
+
+  if (start == end)
+    return 0;
+
+  vector<bool> visited(Vertices, false);
+  vector<int> distance(Vertices, -1);
+
+  vector<int> queue;
+  visited[start] = true;
+  distance[start] = 0;
+  queue.push_back(start);
+
+  while (!queue.empty())
+  {
+    int current = queue.front();
+    queue.erase(queue.begin());
+    for (int i = 0; i < Vertices; i++)
+    {
+      if (adjMatrix[current][i] && !visited[i])
+      {
+        visited[i] = true;
+        distance[i] = distance[current] + 1;
+
+        if (i == end)
+          return distance[i];
+        queue.push_back(i);
+      }
+    }
+  }
+  return -1;
+}
+
 
 int count_matrix_vertices(string fileName) // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
 {
