@@ -12,11 +12,22 @@ int main()
   graph.print_graph();
   graph.findSpanningTree(0);*/
   // string matrix_file=enter_filename();
-  int Vertices = count_matrix_vertices("matrix_graph_test.txt");
+  /*int Vertices = count_matrix_vertices("matrix_graph_test.txt");
   MatrixGraph matrixGraph(Vertices, "matrix_graph_test.txt");
   matrixGraph.read_matrix_from_file();
   cout << "og graph:\n";
   matrixGraph.print_list();
-  matrixGraph.findSpanningTree_matrix(5);
+  matrixGraph.findSpanningTree_matrix(5);*/
+  string inc_file="incendence_matrix_graph_test.txt";
+  int edges;
+  int vertexes=count_vertices_edges(inc_file, edges);
+  IncendenceMatrixGraph incMatrGraph(vertexes, edges, inc_file);
+  incMatrGraph.readFromFile();
+  cout<<"og graph:\n";
+  incMatrGraph.printIncMatrix();
+  cout<<endl;
+  incMatrGraph.removeVertex_incMatrix();
+  cout<<"\nnew graph:\n";
+  incMatrGraph.printIncMatrix();
   return 0;
 }
