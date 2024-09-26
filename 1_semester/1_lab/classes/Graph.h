@@ -56,17 +56,6 @@ public:
   void findSpanningTree(int start);
 };
 
-//----------------------Functions----------------------
-
-string enter_filename()
-{
-  string filename;
-  cout << "Enter the file name: ";
-  cin >> filename;
-  cout << endl;
-  return filename;
-}
-
 // -----------Functions for "Graph"-----------
 
 void Graph::read_graph_from_file()
@@ -419,44 +408,4 @@ void Graph::printSpanningTree(int start, vector<int> &tree)
   for (int i = 0; i < V; i++)
     if (tree[i] != -1)
       cout << tree[i] << " - " << i << endl;
-}
-
-int count_vertices(string filename)
-{
-  int vertex = 0, vertices = -1, count = 0;
-  ifstream fp(filename);
-  if (!fp.is_open())
-    return -1;
-  string line;
-  while (getline(fp, line))
-  {
-    if (line.empty())
-    {
-      vertex++;
-      vertices = max(vertices, vertex);
-      continue;
-    }
-
-    int i = 0;
-    while (i < line.size())
-    {
-      if (line[i] == ' ')
-      {
-        i++;
-        continue;
-      }
-      count = 0;
-      while (i < line.size() && isdigit(line[i]))
-      {
-        count = count * 10 + (line[i] - '0');
-        i++;
-      }
-      i++;
-      vertices = max(vertices, count + 1);
-    }
-    vertex++;
-    vertices = max(vertices, vertex);
-  }
-  fp.close();
-  return vertices;
 }

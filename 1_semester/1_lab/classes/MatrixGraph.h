@@ -344,26 +344,3 @@ void MatrixGraph::findSpanningTree_matrix(int start)
 
   printSpanningTree(start, tree);
 }
-
-int count_matrix_vertices(string fileName) // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
-{
-  ifstream fp(fileName);
-  if (!fp.is_open())
-  {
-    cout << "Cannot open the file." << endl;
-    return -1;
-  }
-
-  string line;
-  int vertices = 0;
-
-  getline(fp, line);
-
-  for (char ch : line)
-    if (ch == '1' || ch == '0')
-      vertices++;
-
-  fp.close();
-
-  return vertices;
-}

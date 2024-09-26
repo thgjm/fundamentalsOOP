@@ -514,29 +514,3 @@ void IncendenceMatrixGraph::findSpanningTree_matrix(int start)
 
     printSpanningTree(start, tree);
 }
-
-int count_vertices_edges(string fileName, int &edges)
-{
-  ifstream fp(fileName);
-  if (!fp.is_open())
-  {
-    cout << "Cannot open the file." << endl;
-    return -1;
-  }
-
-  string line;
-  int vertices = 0;
-  edges = 0;
-  getline(fp, line);
-  vertices++;
-  for (char ch : line)
-    if (isdigit(ch))
-      edges++;
-
-  while (getline(fp, line))
-    vertices++;
-
-  fp.close();
-
-  return vertices;
-}

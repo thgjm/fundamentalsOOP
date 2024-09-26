@@ -1,4 +1,4 @@
-#include "classes/IncendenceMatrixGraph.h"
+#include "classes/graphs.h"
 
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "classes/doctest.h"
@@ -7,7 +7,7 @@
 
 TEST_CASE("Testing functions for Graph class.")
 {
-  string filename = "graph_test.txt";
+  string filename = "textfiles/graph_test.txt";
   int V = count_vertices(filename);
   Graph graph(V, filename);
   graph.read_graph_from_file();
@@ -44,7 +44,7 @@ TEST_CASE("Testing functions for Graph class.")
 
 TEST_CASE("Testing functions for MatrixGraph class.")
 {
-  string filename = "matrix_graph_test.txt";
+  string filename = "textfiles/matrix_graph_test.txt";
   int V = count_matrix_vertices(filename);
   MatrixGraph graph(V, filename);
   graph.read_matrix_from_file();
@@ -81,7 +81,7 @@ TEST_CASE("Testing functions for MatrixGraph class.")
 
 TEST_CASE("Testing functions for IncendenceMatrixGraph class.")
 {
-  string filename = "incendence_matrix_graph_test.txt";
+  string filename = "textfiles/incendence_matrix_graph_test.txt";
   int edges;
   int vertices = count_vertices_edges(filename, edges);
   IncendenceMatrixGraph graph(vertices, edges, filename);
