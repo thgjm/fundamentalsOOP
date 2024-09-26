@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 #include <sstream>
+#include <stack>
 
 using namespace std;
 
@@ -25,6 +26,7 @@ private:
 protected:
   void check_the_vertex(int &vertex);
   void is_graph_directed(bool &directed);
+  void printSpanningTree(int start, vector<int> &tree);
 
 public:
   Graph(int V, string fileName) : V(V), adj(V), fileName(fileName) {};
@@ -50,6 +52,8 @@ public:
   Graph complementGraph();
 
   int shortest_path(int start, int end);
+
+  void findSpanningTree(int start);
 };
 
 // -----------Graphs, represented with adjacency matrix (with vertices)-----------
@@ -98,6 +102,8 @@ public:
   int shortestPath_matrix(int start, int end);
 
   MatrixGraph complementMatrixGraph();
+
+  void findSpanningTree_matrix(int start);
 
   bool **getAdjMatrix()
   {
@@ -388,7 +394,7 @@ string Graph::graph_to_string()
   for (int v = 0; v < V; v++)
   {
     oss << "vertex " << v << ": ";
-    for (size_t i = 0; i < adj[v].size(); i++)
+    for (auto i = 0; i < adj[v].size(); i++)
     {
       oss << adj[v][i];
       if (i < adj[v].size() - 1)
@@ -439,6 +445,42 @@ int Graph::shortest_path(int start, int end)
   }
 
   return -1;
+}
+
+void Graph::findSpanningTree(int start)
+{
+  vector<bool> visited(V, false);
+  vector<int> tree(V, -1);
+  stack<int> st;
+
+  st.push(start);
+  visited[start] = true;
+
+  while (!st.empty())
+  {
+    int u = st.top();
+    st.pop();
+
+    for (int v : adj[u])
+    {
+      if (!visited[v])
+      {
+        visited[v] = true;
+        tree[v] = u;
+        st.push(v);
+      }
+    }
+  }
+
+  printSpanningTree(start, tree);
+}
+
+void Graph::printSpanningTree(int start, vector<int> &tree)
+{
+  cout << "Spanning Tree:\n";
+  for (int i = 0; i < V; i++)
+    if (tree[i] != -1)
+      cout << tree[i] << " - " << i << endl;
 }
 
 
@@ -737,6 +779,33 @@ int MatrixGraph::shortestPath_matrix(int start, int end)
   return -1;
 }
 
+void MatrixGraph::findSpanningTree_matrix(int start)
+{
+  vector<bool> visited(Vertices, false);
+  vector<int> tree(Vertices, -1);
+  stack<int> st;
+
+  st.push(start);
+  visited[start] = true;
+
+  while (!st.empty())
+  {
+    int u = st.top();
+    st.pop();
+
+    for (int v=0; v<Vertices; v++)
+    {
+      if (adjMatrix[u][v] && !visited[v])
+      {
+        visited[v] = true;
+        tree[v] = u;
+        st.push(v);
+      }
+    }
+  }
+
+  printSpanningTree(start, tree);
+}
 
 int count_matrix_vertices(string fileName) // since the adjacency matrix should be square - it is enough to count the amount of elements in the first row
 {
