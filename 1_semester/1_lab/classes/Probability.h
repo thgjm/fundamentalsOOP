@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <functional>
 
 class RandomEvent
 {
@@ -248,5 +249,121 @@ public:
   double variance() const override
   {
     return (1 - p) / (p * p);
+  }
+};
+
+class ContinuousRandomVariable : public RandomVariable
+{
+protected:
+  std::function<double(double)> pdf; // Probability density function
+
+public:
+  ContinuousRandomVariable(const std::string &name, std::function<double(double)> pdf)
+      : RandomVariable(name, {}), pdf(pdf) {}
+
+  // Probability density function
+  double getProbabilityDensity(double x) const
+  {
+    return pdf(x);
+  }
+
+  virtual double CDF(double x) const = 0; // cumulative distribution function
+};
+
+class UniformDistribution : public ContinuousRandomVariable
+{
+private:
+  double a; // lower limit
+  double b; // higher limit
+
+public:
+  UniformDistribution(const std::string &name, double a, double b)
+      : ContinuousRandomVariable(name, [a, b](double x)
+                                 { return (x >= a && x <= b) ? 1.0 / (b - a) : 0.0; }),
+        a(a), b(b)
+  {
+    if (a >= b)
+    {
+      std::cout << "Error. Invalid parameters." << std::endl;
+      this->a = 0.0;
+      this->b = 1.0;
+      return;
+    }
+  }
+
+  double CDF(double x) const override
+  {
+    if (x < a)
+      return 0.0;
+    else if (x > b)
+      return 1.0;
+    else
+      return (x - a) / (b - a);
+  }
+
+  double expectedValue() const override
+  {
+    return (a + b) / 2.0;
+  }
+
+  double variance() const override
+  {
+    return (b - a) * (b - a) / 12.0;
+  }
+};
+
+// Class for Exponential Distribution
+class ExponentialDistribution : public ContinuousRandomVariable
+{
+private:
+  double lambda; // Rate parameter
+
+public:
+  ExponentialDistribution(const std::string &name, double lambda)
+      : ContinuousRandomVariable(name, [lambda](double x)
+                                 { return (x < 0) ? 0 : lambda * exp(-lambda * x); }),
+        lambda(lambda) {}
+
+  double CDF(double x) const override
+  {
+    if (x < 0)
+      return 0.0;
+    else
+      return 1 - exp(-lambda * x);
+  }
+
+  double expectedValue() const override
+  {
+    return 1 / lambda;
+  }
+
+  double variance() const override
+  {
+    return 1 / (lambda * lambda);
+  }
+};
+
+class CombinedRandomEvent : public RandomEvent
+{
+private:
+  const RandomEvent &event1;
+  const RandomEvent &event2;
+  std::string operation; // "and" or "or"
+
+public:
+  CombinedRandomEvent(const std::string &name, const RandomEvent &event1, const RandomEvent &event2, const std::string &operation)
+      : RandomEvent(name), event1(event1), event2(event2), operation(operation) {}
+
+  double probability() const override
+  {
+    if (operation == "AND")
+      return event1.probability() * event2.probability(); // P(A and B) = P(A) * P(B) (if independent)
+    else if (operation == "OR")
+      return event1.probability() + event2.probability() - event1.probability() * event2.probability(); // P(A or B) = P(A) + P(B) - P(A and B)
+    else
+    {
+      std::cout << "Invalid operation. Use 'AND' or 'OR'." << std::endl;
+      return 0.0;
+    }
   }
 };
