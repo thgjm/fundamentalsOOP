@@ -3,6 +3,29 @@
 #include <cmath>
 #include <functional>
 
+template <typename T>
+class Statistics
+{
+public:
+  static double expectedValue(const std::vector<T> &values, const std::vector<double> &probabilities)
+  {
+    double expValue = 0.0;
+    for (size_t i = 0; i < values.size(); i++)
+      expValue += values[i] * probabilities[i];
+    return expValue;
+  }
+
+  static double variance(const std::vector<T> &values, const std::vector<double> &probabilities)
+  {
+    double expValue = expectedValue(values, probabilities);
+    double expValueSquare = 0.0;
+    for (auto i = 0; i < values.size(); i++)
+      expValueSquare += (values[i] * values[i]) * probabilities[i];
+    double var = expValueSquare - (expValue * expValue);
+    return var;
+  }
+};
+
 class RandomEvent
 {
 protected:
@@ -63,7 +86,7 @@ public:
     }
   }
 
-  double probability() const override // should be 1
+  double probability() const override
   {
     double totalProbability = 0.0;
     for (const auto &prob : probabilities)
@@ -73,22 +96,12 @@ public:
 
   double expectedValue() const override
   {
-    double expValue = 0.0;
-    for (auto i = 0; i < values.size(); i++)
-      expValue += values[i] * probabilities[i];
-    return expValue;
+    return Statistics<double>::expectedValue(values, probabilities);
   }
 
   double variance() const override
   {
-    double expValue = expectedValue();
-    double expValueSquare = 0.0;
-    for (auto i = 0; i < values.size(); i++)
-      expValueSquare += (values[i] * values[i]) * probabilities[i];
-
-    double var = expValueSquare - (expValue * expValue);
-
-    return var;
+    return Statistics<double>::variance(values, probabilities);
   }
 
   void printOutDistribution()
@@ -107,20 +120,23 @@ class BinomialDistribution : public DiscreteRandomVariable
 {
 private:
   int n;    // number of trials
+  int k;    // number of successes (for some exact probability)
   double p; // probability of success
 public:
-  BinomialDistribution(const std::string &name, int n, double p)
+  BinomialDistribution(const std::string &name, int n, int k, double p)
       : DiscreteRandomVariable(name, {}, {})
   {
-    if (n < 0 || p < 0 || p > 1)
+    if (n < 0 || k < 0 || k > n || p < 0 || p > 1)
     {
       std::cout << "Error. Invalid parameters." << std::endl;
       this->n = 0;
       this->p = 0.0;
+      this->k = 0;
       return;
     }
     this->n = n;
     this->p = p;
+    this->k = k;
     calculateDistribution();
   }
 
@@ -129,10 +145,10 @@ public:
     values.clear();
     probabilities.clear();
 
-    for (int k = 0; k <= n; k++)
+    for (int kk = 0; kk <= n; kk++)
     {
-      double probability = binomialProbability(n, k, p);
-      values.push_back(k);
+      double probability = binomialProbability(n, kk, p);
+      values.push_back(kk);
       probabilities.push_back(probability);
     }
   }
@@ -152,6 +168,11 @@ public:
   double variance() const override
   {
     return n * p * (1 - p);
+  }
+
+  double probability() const override
+  {
+    return probabilities[k];
   }
 };
 
