@@ -3,29 +3,6 @@
 #include <cmath>
 #include <functional>
 
-template <typename T>
-class Statistics
-{
-public:
-  static double expectedValue(const std::vector<T> &values, const std::vector<double> &probabilities)
-  {
-    double expValue = 0.0;
-    for (size_t i = 0; i < values.size(); i++)
-      expValue += values[i] * probabilities[i];
-    return expValue;
-  }
-
-  static double variance(const std::vector<T> &values, const std::vector<double> &probabilities)
-  {
-    double expValue = expectedValue(values, probabilities);
-    double expValueSquare = 0.0;
-    for (auto i = 0; i < values.size(); i++)
-      expValueSquare += (values[i] * values[i]) * probabilities[i];
-    double var = expValueSquare - (expValue * expValue);
-    return var;
-  }
-};
-
 class RandomEvent
 {
 protected:
@@ -96,12 +73,22 @@ public:
 
   double expectedValue() const override
   {
-    return Statistics<double>::expectedValue(values, probabilities);
+    double expValue = 0.0;
+    for (auto i = 0; i < values.size(); i++)
+      expValue += values[i] * probabilities[i];
+    return expValue;
   }
 
   double variance() const override
   {
-    return Statistics<double>::variance(values, probabilities);
+    double expValue = expectedValue();
+    double expValueSquare = 0.0;
+    for (auto i = 0; i < values.size(); i++)
+      expValueSquare += (values[i] * values[i]) * probabilities[i];
+
+    double var = expValueSquare - (expValue * expValue);
+
+    return var;
   }
 
   void printOutDistribution()
