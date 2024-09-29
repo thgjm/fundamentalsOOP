@@ -110,3 +110,30 @@ int count_vertices_edges(string fileName, int &edges)
 
   return vertices;
 }
+
+template <typename T>
+void printOutDRV(const T &dist)
+{
+  cout << "Probability (" << dist.getName() << "): " << dist.probability() << endl;
+  cout << "Expected Value (" << dist.getName() << "): " << dist.expectedValue() << endl;
+  cout << "Variance (" << dist.getName() << "): " << dist.variance() << endl;
+}
+
+template <typename T>
+void printOutCRV(const T &dist, const double x)
+{
+  cout << "PDF at x=" << x << ": " << dist.getProbabilityDensity(x) << "\n";
+  cout << "CDF at x=" << x << ": " << dist.CDF(x) << "\n";
+  cout << "Expected value: " << dist.expectedValue() << "\n";
+  cout << "Variance: " << dist.variance() << "\n";
+}
+
+template <typename T1, typename T2>
+void printOutCRE(const T1 &eventA, const T2 &eventB)
+{
+  CombinedRandomEvent combinedEvent1("A AND B", eventA, eventB, "AND");
+  cout << "P(A AND B) = " << combinedEvent1.probability() << endl;
+
+  CombinedRandomEvent combinedEvent2("A OR B", eventA, eventB, "OR");
+  cout << "P(A OR B) = " << combinedEvent2.probability() << endl;
+}
