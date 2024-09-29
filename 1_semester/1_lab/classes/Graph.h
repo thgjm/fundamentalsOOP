@@ -36,6 +36,11 @@ public:
     return V;
   }
 
+  vector<vector<int>> get_graph()
+  {
+    return adj;
+  }
+
   void read_graph_from_file();
   void print_graph();
 
@@ -46,8 +51,6 @@ public:
   void remove_the_vertex();
 
   bool isConnected();
-
-  string graph_to_string();
 
   Graph complementGraph();
 
@@ -315,22 +318,6 @@ bool Graph::isConnected()
   return true;
 }
 
-string Graph::graph_to_string()
-{
-  std::ostringstream oss;
-  for (int v = 0; v < V; v++)
-  {
-    oss << "vertex " << v << ": ";
-    for (auto i = 0; i < adj[v].size(); i++)
-    {
-      oss << adj[v][i];
-      if (i < adj[v].size() - 1)
-        oss << " ";
-    }
-    oss << "\n";
-  }
-  return oss.str();
-}
 
 int Graph::shortest_path(int start, int end)
 {
