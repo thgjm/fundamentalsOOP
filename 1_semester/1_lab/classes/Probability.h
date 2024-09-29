@@ -267,6 +267,11 @@ public:
     return pdf(x);
   }
 
+  double probability() const override
+  {
+    return 0.0;
+  };
+
   virtual double CDF(double x) const = 0; // cumulative distribution function
 };
 
