@@ -43,8 +43,9 @@ private slots:
     void openApplication();
     void openDocument();
     void updateTimeoutConnections();
-    void restartTimer();
+    void resetTimer();
     void PauseResume();
+    void generalTimeout();
     void openInfoWindow();
     void updateTimerInfo(TimerInfo timerInfo);
 

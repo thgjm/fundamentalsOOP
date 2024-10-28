@@ -2,6 +2,7 @@
 #include "ui_timerinfowindow.h"
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
+#include <QMessageBox>
 
 TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings)
     : QDialog(parent)
@@ -116,6 +117,9 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsW
 
         ui->timerName->setText(timerInfo.Title);
     }
+
+    connect(ui->OKButton, &QPushButton::clicked, this, &TimerInfoWindow::OKPushed);
+    connect(ui->CancelButton, &QPushButton::clicked, this, &TimerInfoWindow::CancelPushed);
 }
 
 TimerInfoWindow::~TimerInfoWindow()
@@ -131,42 +135,6 @@ void TimerInfoWindow::copyComboBoxItems(QComboBox* source, QComboBox* destinatio
         destination->addItem(source->itemIcon(i), source->itemText(i));
         destination->setItemData(i, source->itemData(i));
     }
-}
-
-void TimerInfoWindow::on_buttonBox_clicked(QAbstractButton *button)
-{
-    if (ui->buttonBox->button(QDialogButtonBox::Ok) == button)
-    {
-        if (ui->soundCheckBox->isChecked())
-            timerInfo.soundName = ui->soundComboBox->currentData().toString();
-        else
-            timerInfo.soundName="";
-        if (ui->imageCheckBox->isChecked())
-            timerInfo.imageName = ui->imageComboBox->currentData().toString();
-        else
-            timerInfo.imageName="";
-        if (ui->appCheckBox->isChecked())
-            timerInfo.appName = ui->appComboBox->currentData().toString();
-        else
-            timerInfo.appName="";
-        if (ui->documentCheckBox->isChecked())
-            timerInfo.documentName = ui->documentComboBox->currentData().toString();
-        else
-            timerInfo.documentName="";
-        timerInfo.Title = ui->timerName->text();
-        int hours = ui->hourCount ? ui->hourCount->value() : 0;
-        int minutes = ui->minuteCount ? ui->minuteCount->value() : 0;
-        int seconds = ui->secondCount ? ui->secondCount->value() : 0;
-
-        if(ui->AmPmBox->currentText() == "AM") timerInfo.timer->AmPm = "AM";
-        else timerInfo.timer->AmPm = "PM";
-        timerInfo.selectedDateTime.setTime(QTime(hours, minutes, seconds));
-        timerInfo.selectedDateTime.setDate(ui->calendarWidget->selectedDate());
-        emit timerInfoUpdated(timerInfo);
-        accept();
-    }
-    else if (ui->buttonBox->button(QDialogButtonBox::Cancel) == button)
-        reject();
 }
 
 void TimerInfoWindow::uploadImage()
@@ -229,4 +197,68 @@ void TimerInfoWindow::uploadDocument()
     ui->documentComboBox->setItemData(ui->documentComboBox->count() - 1, filePath);
 
     QMessageBox::information(this, tr("Document Uploaded"), tr("You have successfully uploaded the document: %1").arg(docName));
+}
+
+void TimerInfoWindow::OKPushed()
+{
+    if (ui->soundCheckBox->isChecked())
+        timerInfo.soundName = ui->soundComboBox->currentData().toString();
+    else
+        timerInfo.soundName="";
+    if (ui->imageCheckBox->isChecked())
+        timerInfo.imageName = ui->imageComboBox->currentData().toString();
+    else
+        timerInfo.imageName="";
+    if (ui->appCheckBox->isChecked())
+        timerInfo.appName = ui->appComboBox->currentData().toString();
+    else
+        timerInfo.appName="";
+    if (ui->documentCheckBox->isChecked())
+        timerInfo.documentName = ui->documentComboBox->currentData().toString();
+    else
+        timerInfo.documentName="";
+
+    timerInfo.Title = ui->timerName->text();
+
+    int hours = ui->hourCount ? ui->hourCount->value() : 0;
+    int minutes = ui->minuteCount ? ui->minuteCount->value() : 0;
+    int seconds = ui->secondCount ? ui->secondCount->value() : 0;
+
+    if(ui->AmPmBox->currentText() == "AM") timerInfo.timer->AmPm = "AM";
+    else timerInfo.timer->AmPm = "PM";
+
+    timerInfo.selectedDateTime.setTime(QTime(hours, minutes, seconds));
+    timerInfo.selectedDateTime.setDate(ui->calendarWidget->selectedDate());
+
+
+
+    if (timerInfo.Ttype == TimerType::Alarm)
+    {
+
+        QDateTime currentDateTime=timerInfo.timer->changeTime();
+        QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
+        // Handle 12-hour format adjustments
+        if (timerInfo.timer->TimeFormat != "HH:mm:ss")
+        {
+            if (timerInfo.timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
+                adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(12 * 3600);
+            else if (timerInfo.timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
+                adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(-12 * 3600);
+        }
+        int secondsToPlay = currentDateTime.secsTo(adjustedSelectedDateTime);
+        if (secondsToPlay <= 0)
+        {
+            QMessageBox::about(this, "Error.", "The selected time has already passed. Please choose another one.");
+            return;
+        }
+    }
+
+    emit timerInfoUpdated(timerInfo);
+    this->close();
+}
+
+
+void TimerInfoWindow::CancelPushed()
+{
+    this->close();
 }

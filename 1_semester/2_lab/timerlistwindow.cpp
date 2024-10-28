@@ -31,7 +31,7 @@ TimerListWindow::TimerListWindow(QDialog *parent, TimerInfo timerInfo, SettingsW
 
     qDebug() << timerInfo.selectedDateTime.time().hour()<<":"<<timerInfo.selectedDateTime.time().minute()<<":"<<timerInfo.selectedDateTime.time().second();
 
-    connect(ui->restartButton, &QPushButton::clicked, this, &TimerListWindow::restartTimer);
+    connect(ui->resetButton, &QPushButton::clicked, this, &TimerListWindow::resetTimer);
     connect(ui->stopButton, &QPushButton::clicked, this, &TimerListWindow::PauseResume);
 
     TimerStart();
@@ -61,6 +61,7 @@ void TimerListWindow::PauseResume()
     {
         timerPaused = !timerPaused;
         TimerStart();
+
         ui->stopButton->setText("Pause");
     }
     else
@@ -73,7 +74,7 @@ void TimerListWindow::PauseResume()
     }
 }
 
-void TimerListWindow::restartTimer()
+void TimerListWindow::resetTimer()
 {
     if(timerPaused)
     {
@@ -81,15 +82,18 @@ void TimerListWindow::restartTimer()
         countDown->setDisplay(ui->countdownLabel);
         countDown->start();
         countDown->stop();
+        ui->stopButton->setText("Start");
     }
     if (countDown)
     {
         countDown->stop();
         delete countDown;
         countDown = nullptr;
+        if(ui->stopButton->text()!="Start") ui->stopButton->setText("Pause");
     }
     remainingTime = 0;
-    ui->stopButton->setText("Start");
+    ui->resetButton->setText("Reset Timer");
+    ui->stopButton->show();
     TimerStart();
 }
 
@@ -107,13 +111,21 @@ void TimerListWindow::SetAlarmDisplay()
     {
         QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
         ui->alarmTimeLabel->setFont(QFont(family, 40));
+    }
+    else
+        qDebug() << "The font was not uploaded.";
+
+    fontId = QFontDatabase::addApplicationFont(":/fonts/resources/fonts/Oxanium/static/Oxanium-Regular.ttf");
+    if (fontId != -1)
+    {
+        QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
         ui->alarmDateLabel->setFont(QFont(family, 20));
     }
     else
         qDebug() << "The font was not uploaded.";
 
     QString timeText;
-    QString DateText = timerInfo.selectedDateTime.date().toString("dd.MM.yyyy");
+    QString DateText = timerInfo.selectedDateTime.date().toString("MMMM d, yyyy");
     ui->alarmDateLabel->setText(DateText);
 
     if(timerInfo.timer->TimeFormat == "HH:mm:ss")
@@ -131,23 +143,47 @@ void TimerListWindow::SetAlarmDisplay()
         timeText = adjustedSelectedTime.toString("hh:mm:ss AP");
         ui->alarmTimeLabel->setText(timeText);
     }
-
-
 }
 
 void TimerListWindow::TurnAlarmOnOff()
 {
-    if(AlarmOn)
+    if(ui->turnOnOffButton->text() == "Turn on again.")
+    {
+        timerInfo.selectedDateTime = timerInfo.selectedDateTime.addDays(1);
+        qDebug() << "next day: "<<timerInfo.selectedDateTime.date();
+        SetAlarmDisplay();
+        AlarmOn = false;
+    }
+    if(!AlarmOn)
+    {
+        QDateTime currentDateTime = timerInfo.timer->changeTime();
+        QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
+        if (timerInfo.timer->TimeFormat != "HH:mm:ss")
+        {
+            if (timerInfo.timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
+                adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(12 * 3600);
+            else if (timerInfo.timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
+                adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(-12 * 3600);
+        }
+
+        int secondsToPlay = currentDateTime.secsTo(adjustedSelectedDateTime);
+
+        if (secondsToPlay > 0)
+            TimerStart();
+        else
+        {
+            timerInfo.selectedDateTime = timerInfo.selectedDateTime.addDays(1);
+            qDebug() << "next day: "<<timerInfo.selectedDateTime.date();
+            SetAlarmDisplay();
+        }
+        ui->turnOnOffButton->setText("Turn Off");
+        ui->alarmTimeLabel->setStyleSheet("QLabel { color : green; }");
+    }
+    else
     {
         timerInfo.timer->stop();
         ui->turnOnOffButton->setText("Turn On");
         ui->alarmTimeLabel->setStyleSheet("QLabel { color : orange; }");
-    }
-    else
-    {
-        TimerStart();
-        ui->turnOnOffButton->setText("Turn Off");
-        ui->alarmTimeLabel->setStyleSheet("QLabel { color : green; }");
     }
     AlarmOn = !AlarmOn;
 }
@@ -176,7 +212,7 @@ void TimerListWindow::TimerStart()
         else
             timerInfo.timer->stop();
     }
-    /*else if (timerInfo.Ttype == TimerType::Alarm)
+    else if (timerInfo.Ttype == TimerType::Alarm)
     {
         QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
 
@@ -190,7 +226,7 @@ void TimerListWindow::TimerStart()
         }
 
         // Calculate the seconds until the alarm
-        int secondsToPlay = currentDateTime.secsTo(adjustedSelectedDateTime);
+        int secondsToPlay = currentDateTime.secsTo(adjustedSelectedDateTime) + 1;
 
         // Add a debug statement to track the calculated seconds
         qDebug() << "Calculated seconds to alarm:" << secondsToPlay;
@@ -198,37 +234,81 @@ void TimerListWindow::TimerStart()
         if (secondsToPlay > 0)
             timerInfo.timer->start(secondsToPlay * 1000);
         else
-            timerInfo.timer->stop();
-    }*/
-    else if (timerInfo.Ttype == TimerType::Alarm)
-    {
-        QTime currentTime = timerInfo.timer->changeTime().time();
-        int secondsToPlay;
-        if (timerInfo.timer->TimeFormat == "HH:mm:ss")
-            // 24h-format
-            secondsToPlay = currentTime.secsTo(timerInfo.selectedDateTime.time());
-        else
         {
-            // 12h-format
-            QTime adjustedSelectedTime = timerInfo.selectedDateTime.time();
-
-            if (timerInfo.timer->AmPm == "PM" && adjustedSelectedTime.hour() != 12)
-                adjustedSelectedTime = adjustedSelectedTime.addSecs(12 * 3600);
-            else if (timerInfo.timer->AmPm == "AM" && adjustedSelectedTime.hour() == 12)
-                adjustedSelectedTime = adjustedSelectedTime.addSecs(-12 * 3600);
-
-            secondsToPlay = currentTime.secsTo(adjustedSelectedTime);
+            timerInfo.selectedDateTime = timerInfo.selectedDateTime.addDays(1);
+            qDebug() << "next day: "<<timerInfo.selectedDateTime.date();
+            SetAlarmDisplay();
         }
-
-        qDebug() << "Alarm mode seconds to play:" << secondsToPlay;
-        if (secondsToPlay > 0)
-            timerInfo.timer->start(secondsToPlay * 1000);
-        else
-            timerInfo.timer->stop();
     }
     updateTimeoutConnections();
 }
 
+void TimerListWindow::updateTimeoutConnections()
+{
+    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::PlaySoundtrack);
+    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::ShowImage);
+    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openDocument);
+    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openApplication);
+    if (timerInfo.soundName!="")
+        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::PlaySoundtrack);
+    if (timerInfo.imageName!="")
+        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::ShowImage);
+    if (timerInfo.documentName!="")
+        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openDocument);
+    if (timerInfo.appName!="")
+        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openApplication);
+    connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::generalTimeout);
+}
+
+void TimerListWindow::openInfoWindow()
+{
+    info = new TimerInfoWindow(nullptr, timerInfo, settings);
+    info->setWindowTitle("Timer Info Page");
+    info->show();
+    connect(info, &TimerInfoWindow::timerInfoUpdated, this, &TimerListWindow::updateTimerInfo);
+}
+
+void TimerListWindow::generalTimeout()
+{
+    if(timerInfo.Ttype == TimerType::Timer)
+    {
+        timerPaused = true;
+        ui->stopButton->hide();
+        ui->resetButton->setText("Restart Timer");
+    }
+    else
+    {
+        ui->alarmTimeLabel->setStyleSheet("QLabel { color : red; }");
+        ui->turnOnOffButton->setText("Turn on again.");
+
+    }
+}
+
+void TimerListWindow::updateTimerInfo(TimerInfo newTimerInfo)
+{
+    qDebug() << "got info";
+    timerInfo.soundName = newTimerInfo.soundName;
+    timerInfo.imageName = newTimerInfo.imageName;
+    timerInfo.appName = newTimerInfo.appName;
+    timerInfo.documentName = newTimerInfo.documentName;
+    timerInfo.selectedDateTime = newTimerInfo.selectedDateTime;
+    timerInfo.Title= newTimerInfo.Title;
+    timerInfo.timer= newTimerInfo.timer;
+    if (timerInfo.Ttype == TimerType::Timer)
+    {
+        ui->timerName->setText(timerInfo.Title);
+        remainingTime=0;
+        if(countDown)
+        {   countDown->stop();
+            delete countDown;
+            countDown = nullptr; }
+    }
+    else
+        ui->alarmName->setText(timerInfo.Title);
+    SetAlarmDisplay();
+    TimerStart();
+    updateTimeoutConnections();
+}
 
 void TimerListWindow::PlaySoundtrack()
 {
@@ -257,21 +337,6 @@ void TimerListWindow::ShowImage()
     timerInfo.timer->stop();
 }
 
-void TimerListWindow::updateTimeoutConnections()
-{
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::PlaySoundtrack);
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::ShowImage);
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openDocument);
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openApplication);
-    if (timerInfo.soundName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::PlaySoundtrack);
-    if (timerInfo.imageName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::ShowImage);
-    if (timerInfo.documentName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openDocument);
-    if (timerInfo.appName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openApplication);
-}
 
 void TimerListWindow::openApplication()
 {
@@ -297,37 +362,4 @@ void TimerListWindow::openDocument()
     else
         qDebug() << "Failed to open document.";
     timerInfo.timer->stop();
-}
-
-void TimerListWindow::openInfoWindow()
-{
-    info = new TimerInfoWindow(this, timerInfo, settings);
-    info->setWindowTitle("Timer Info Page");
-    info->show();
-    connect(info, &TimerInfoWindow::timerInfoUpdated, this, &TimerListWindow::updateTimerInfo);
-}
-
-void TimerListWindow::updateTimerInfo(TimerInfo newTimerInfo)
-{
-    timerInfo.soundName = newTimerInfo.soundName;
-    timerInfo.imageName = newTimerInfo.imageName;
-    timerInfo.appName = newTimerInfo.appName;
-    timerInfo.documentName = newTimerInfo.documentName;
-    timerInfo.selectedDateTime = newTimerInfo.selectedDateTime;
-    timerInfo.Title= newTimerInfo.Title;
-    timerInfo.timer= newTimerInfo.timer;
-    if (timerInfo.Ttype == TimerType::Timer)
-    {
-        ui->timerName->setText(timerInfo.Title);
-        remainingTime=0;
-        if(countDown)
-        {   countDown->stop();
-            delete countDown;
-            countDown = nullptr; }
-    }
-    else
-        ui->alarmName->setText(timerInfo.Title);
-    SetAlarmDisplay();
-    TimerStart();
-    updateTimeoutConnections();
 }

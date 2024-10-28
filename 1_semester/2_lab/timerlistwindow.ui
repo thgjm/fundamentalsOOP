@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>974</width>
-    <height>341</height>
+    <height>558</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <enum>QFrame::Shape::Box</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -60,9 +60,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="restartButton">
+          <widget class="QPushButton" name="resetButton">
            <property name="text">
-            <string>Restart Timer</string>
+            <string>Reset Timer</string>
            </property>
           </widget>
          </item>

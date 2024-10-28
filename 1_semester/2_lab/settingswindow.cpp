@@ -69,9 +69,7 @@ void SettingsWindow::openTimerLists()
 
     timer->setSpinBoxes(ui->hourCount, ui->minuteCount, ui->secondCount);
     selectedTime = timer->getInitialTime();
-    QDateTime selectedDateTime(ui->calendarWidget->selectedDate(), selectedTime);
-
-    QDateTime currentDateTime = timer->changeTime();
+    QDateTime selectedDateTime = QDateTime(ui->calendarWidget->selectedDate(), selectedTime, *timeZone);
 
     if(ui->timerRadioButton->isChecked()) Ttype=TimerType::Timer;
     else if(ui->alarmRadioButton->isChecked()) Ttype=TimerType::Alarm;
@@ -83,10 +81,16 @@ void SettingsWindow::openTimerLists()
     else
         title="Timer";
 
+    QDateTime currentDateTime = timer->changeTime();
+
+    qDebug()<<"currentDateTime: "<<currentDateTime.time().hour()<<" "<<currentDateTime.time().minute()<<" "<<currentDateTime.time().second();
+
 
     if (Ttype == TimerType::Alarm)
     {
         QDateTime adjustedSelectedDateTime = selectedDateTime;
+
+        qDebug()<<"selectedDateTime: "<<selectedDateTime.time().hour()<<" "<<selectedDateTime.time().minute()<<" "<<selectedDateTime.time().second();
 
         // Handle 12-hour format adjustments
         if (timer->TimeFormat != "HH:mm:ss")
@@ -135,6 +139,8 @@ void SettingsWindow::closeEvent(QCloseEvent *event)
     ui->hourCount->setValue(0);
     ui->minuteCount->setValue(0);
     ui->secondCount->setValue(0);
+
+    ui->calendarWidget->setSelectedDate(timer->changeTime().date());
 
     event->accept();
 }

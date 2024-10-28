@@ -29,11 +29,12 @@ signals:
     void timerInfoUpdated(TimerInfo timerInfo);
 
 private slots:
-    void on_buttonBox_clicked(QAbstractButton *button);
     void uploadImage();
     void uploadSound();
     void uploadApp();
     void uploadDocument();
+    void OKPushed();
+    void CancelPushed();
 
 private:
     Ui::TimerInfoWindow *ui;

@@ -13,5 +13,6 @@
     </qresource>
     <qresource prefix="/fonts">
         <file>resources/fonts/Orbitron/static/Orbitron-Regular.ttf</file>
+        <file>resources/fonts/Oxanium/static/Oxanium-Regular.ttf</file>
     </qresource>
 </RCC>
