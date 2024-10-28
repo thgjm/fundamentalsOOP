@@ -32,6 +32,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         timerlistwindow.h timerlistwindow.cpp timerlistwindow.ui
         countdown.h countdown.cpp
         timerinfowindow.h timerinfowindow.cpp timerinfowindow.ui
+        timerinfo.h
 
 
     )

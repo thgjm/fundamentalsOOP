@@ -20,7 +20,7 @@ SettingsWindow::SettingsWindow(QTimeZone *timezone, QString TimeFormat, QWidget 
 
     QDate todayDate = timer->changeTime().date();
 
-    ui->dateEdit->setMinimumDate(todayDate);
+    ui->calendarWidget->setMinimumDate(todayDate);
 
     qDebug() << todayDate.day();
 
@@ -69,7 +69,7 @@ void SettingsWindow::openTimerLists()
 
     timer->setSpinBoxes(ui->hourCount, ui->minuteCount, ui->secondCount);
     selectedTime = timer->getInitialTime();
-    QDateTime selectedDateTime(ui->dateEdit->date(), selectedTime);
+    QDateTime selectedDateTime(ui->calendarWidget->selectedDate(), selectedTime);
 
     QDateTime currentDateTime = timer->changeTime();
 
@@ -108,7 +108,9 @@ void SettingsWindow::openTimerLists()
         }
     }
 
-    Tlists = new TimerListWindow(this, timer, soundName, imageName, appName, documentName, title, Ttype, selectedDateTime, this);
+    TimerInfo timerInfo(soundName, imageName, appName, documentName, title, selectedDateTime, timer, Ttype);
+
+    Tlists = new TimerListWindow(this, timerInfo, this);
 
     Tlists->setWindowTitle("Timers List");
     Tlists->show();
@@ -177,12 +179,12 @@ bool SettingsWindow::CheckTimeFormat()
         ui->hourCount->setMinimum(0);
         ui->AmPmBox->hide();
         //ui->hourCount->setValue(0);
-        ui->dateEdit->hide();
+        ui->calendarWidget->hide();
         return true;
     }
     else if (ui->alarmRadioButton->isChecked())
     {
-        ui->dateEdit->show();
+        ui->calendarWidget->show();
         if (TimeFormat == "hh:mm:ss AP") {
             ui->hourCount->setMaximum(12);
             ui->hourCount->setMinimum(1);

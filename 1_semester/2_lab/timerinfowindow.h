@@ -8,10 +8,9 @@
 #include <QComboBox>
 #include <QAbstractButton>
 #include <QFileDialog>
+#include "timerinfo.h"
 
 class SettingsWindow;
-
-enum class TimerType {Timer, Alarm};
 
 namespace Ui {
 class TimerInfoWindow;
@@ -22,12 +21,12 @@ class TimerInfoWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit TimerInfoWindow(QWidget *parent, QDateTime selectedDateTime, QString soundName, QString imageName, QString appName, QString documentName, QString Title, QString TimeFormat, SettingsWindow* settings, TimerType Ttype, bool AmPm);
+    explicit TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings);
     ~TimerInfoWindow();
     void copyComboBoxItems(QComboBox* source, QComboBox* destination);
 
 signals:
-    void timerInfoUpdated(QDateTime selectedDateTime, QString soundName, QString imageName, QString appName, QString documentName, QString Title, bool AmPm);
+    void timerInfoUpdated(TimerInfo timerInfo);
 
 private slots:
     void on_buttonBox_clicked(QAbstractButton *button);
@@ -39,15 +38,7 @@ private slots:
 private:
     Ui::TimerInfoWindow *ui;
     SettingsWindow* settings;
-    QString soundName;
-    QString imageName;
-    QString appName;
-    QString documentName;
-    QString Title;
-    QString TimeFormat;
-    QDateTime selectedDateTime;
-    TimerType Ttype;
-    bool AmPm; //AM - true, PM - false
+    TimerInfo timerInfo;
 };
 
 #endif // TIMERINFOWINDOW_H

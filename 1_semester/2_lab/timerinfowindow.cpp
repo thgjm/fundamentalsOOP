@@ -3,22 +3,27 @@
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
 
-TimerInfoWindow::TimerInfoWindow(QWidget *parent, QDateTime selectedDateTime, QString soundName, QString imageName, QString appName, QString documentName, QString Title, QString TimeFormat, SettingsWindow* settings, TimerType Ttype, bool AmPm)
+TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings)
     : QDialog(parent)
-    , ui(new Ui::TimerInfoWindow)
+    , ui(new Ui::TimerInfoWindow), timerInfo(timerInfo)
 {
     ui->setupUi(this);
 
-    if(Ttype == TimerType::Timer)
+    ui->calendarWidget->setMinimumDate(settings->ui->calendarWidget->minimumDate());
+
+    ui->calendarWidget->setSelectedDate(timerInfo.selectedDateTime.date());
+
+    if(timerInfo.Ttype == TimerType::Timer)
     {
         ui->hourCount->setMaximum(23);
         ui->hourCount->setMinimum(0);
         ui->AmPmBox->hide();
+        ui->calendarWidget->hide();
     }
 
-    if(Ttype == TimerType::Alarm)
+    if(timerInfo.Ttype == TimerType::Alarm)
     {
-        if(TimeFormat == "HH:mm:ss")
+        if(timerInfo.timer->TimeFormat == "HH:mm:ss")
         {
             ui->hourCount->setMaximum(23);
             ui->hourCount->setMinimum(0);
@@ -30,24 +35,25 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, QDateTime selectedDateTime, QS
             ui->hourCount->setMinimum(1);
             ui->AmPmBox->show();
         }
+        ui->calendarWidget->show();
     }
 
     if (settings)
     {
-        ui->hourCount->setValue(selectedDateTime.time().hour());
-        ui->minuteCount->setValue(selectedDateTime.time().minute());
-        ui->secondCount->setValue(selectedDateTime.time().second());
+        ui->hourCount->setValue(timerInfo.selectedDateTime.time().hour());
+        ui->minuteCount->setValue(timerInfo.selectedDateTime.time().minute());
+        ui->secondCount->setValue(timerInfo.selectedDateTime.time().second());
         copyComboBoxItems(settings->ui->soundComboBox, ui->soundComboBox);
         copyComboBoxItems(settings->ui->imageComboBox, ui->imageComboBox);
         copyComboBoxItems(settings->ui->appComboBox, ui->appComboBox);
         copyComboBoxItems(settings->ui->documentComboBox, ui->documentComboBox);
 
-        if(soundName!="")
+        if(timerInfo.soundName!="")
         {
             ui->soundCheckBox->setChecked(true);
             int index = -1;
             for (int i = 0; i < ui->soundComboBox->count(); ++i)
-                if (ui->soundComboBox->itemData(i).toString() == soundName)
+                if (ui->soundComboBox->itemData(i).toString() == timerInfo.soundName)
                 {
                     index = i;
                     break;
@@ -57,13 +63,13 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, QDateTime selectedDateTime, QS
                 ui->soundComboBox->setCurrentIndex(index);
         }
 
-        if(imageName!="")
+        if(timerInfo.imageName!="")
         {
             ui->imageCheckBox->setChecked(true);
 
             int index = -1;
             for (int i = 0; i < ui->imageComboBox->count(); ++i)
-                if (ui->imageComboBox->itemData(i).toString() == imageName)
+                if (ui->imageComboBox->itemData(i).toString() == timerInfo.imageName)
                 {
                     index = i;
                     break;
@@ -73,12 +79,12 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, QDateTime selectedDateTime, QS
                 ui->imageComboBox->setCurrentIndex(index);
         }
 
-        if(appName!="")
+        if(timerInfo.appName!="")
         {
             ui->appCheckBox->setChecked(true);
             int index = -1;
             for (int i = 0; i < ui->appComboBox->count(); ++i)
-                if (ui->appComboBox->itemData(i).toString() == appName)
+                if (ui->appComboBox->itemData(i).toString() == timerInfo.appName)
                 {
                     index = i;
                     break;
@@ -88,12 +94,12 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, QDateTime selectedDateTime, QS
                 ui->appComboBox->setCurrentIndex(index);
         }
 
-        if(documentName!="")
+        if(timerInfo.documentName!="")
         {
             ui->documentCheckBox->setChecked(true);
             int index = -1;
             for (int i = 0; i < ui->documentComboBox->count(); ++i)
-                if (ui->documentComboBox->itemData(i).toString() == documentName)
+                if (ui->documentComboBox->itemData(i).toString() == timerInfo.documentName)
                 {
                     index = i;
                     break;
@@ -108,7 +114,7 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, QDateTime selectedDateTime, QS
         connect(ui->uploadAppButton, &QPushButton::clicked, this, &TimerInfoWindow::uploadApp);
         connect(ui->uploadDocumentButton, &QPushButton::clicked, this, &TimerInfoWindow::uploadDocument);
 
-        ui->timerName->setText(Title);
+        ui->timerName->setText(timerInfo.Title);
     }
 }
 
@@ -132,26 +138,31 @@ void TimerInfoWindow::on_buttonBox_clicked(QAbstractButton *button)
     if (ui->buttonBox->button(QDialogButtonBox::Ok) == button)
     {
         if (ui->soundCheckBox->isChecked())
-            soundName = ui->soundComboBox->currentData().toString();
+            timerInfo.soundName = ui->soundComboBox->currentData().toString();
         else
-            soundName="";
+            timerInfo.soundName="";
         if (ui->imageCheckBox->isChecked())
-            imageName = ui->imageComboBox->currentData().toString();
-        else imageName="";
+            timerInfo.imageName = ui->imageComboBox->currentData().toString();
+        else
+            timerInfo.imageName="";
         if (ui->appCheckBox->isChecked())
-            appName = ui->appComboBox->currentData().toString();
-        else appName="";
+            timerInfo.appName = ui->appComboBox->currentData().toString();
+        else
+            timerInfo.appName="";
         if (ui->documentCheckBox->isChecked())
-            documentName = ui->documentComboBox->currentData().toString();
-        else documentName="";
-        Title = ui->timerName->text();
+            timerInfo.documentName = ui->documentComboBox->currentData().toString();
+        else
+            timerInfo.documentName="";
+        timerInfo.Title = ui->timerName->text();
         int hours = ui->hourCount ? ui->hourCount->value() : 0;
         int minutes = ui->minuteCount ? ui->minuteCount->value() : 0;
         int seconds = ui->secondCount ? ui->secondCount->value() : 0;
-        if(ui->AmPmBox->currentText() == "AM") AmPm=true;
-        else AmPm=false;
-        selectedDateTime.setTime(QTime(hours, minutes, seconds));
-        emit timerInfoUpdated(selectedDateTime, soundName, imageName, appName, documentName, Title, AmPm);
+
+        if(ui->AmPmBox->currentText() == "AM") timerInfo.timer->AmPm = "AM";
+        else timerInfo.timer->AmPm = "PM";
+        timerInfo.selectedDateTime.setTime(QTime(hours, minutes, seconds));
+        timerInfo.selectedDateTime.setDate(ui->calendarWidget->selectedDate());
+        emit timerInfoUpdated(timerInfo);
         accept();
     }
     else if (ui->buttonBox->button(QDialogButtonBox::Cancel) == button)

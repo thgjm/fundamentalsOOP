@@ -2,7 +2,6 @@
 #define TIMERLISTWINDOW_H
 
 #include <QDialog>
-#include "timer.h"
 #include <QImage>
 #include <QMediaPlayer>
 #include <QAudioOutput>
@@ -34,7 +33,7 @@ class TimerListWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit TimerListWindow(QDialog *parent, Timer* timer, QString soundName, QString imageName, QString appName, QString documentName, QString Title, TimerType Ttype, QDateTime selectedDateTime, SettingsWindow* settings);
+    explicit TimerListWindow(QDialog *parent, TimerInfo timerInfo, SettingsWindow* settings);
     ~TimerListWindow();
 
 private slots:
@@ -47,7 +46,7 @@ private slots:
     void restartTimer();
     void PauseResume();
     void openInfoWindow();
-    void updateTimerInfo(QDateTime selectedDateTime, QString soundName, QString imageName, QString appName, QString documentName, QString Title, bool AmPm);
+    void updateTimerInfo(TimerInfo timerInfo);
 
     void SetAlarmDisplay();
     void TurnAlarmOnOff();
@@ -56,13 +55,8 @@ private:
 
     Ui::TimerListWindow *ui;
 
-    Timer* timer;
-    QDateTime selectedDateTime;
-    QString soundName;
-    QString imageName;
-    QString appName;
-    QString documentName;
-    QString Title;
+    TimerInfo timerInfo;
+
     bool timerPaused = false;
     bool AlarmOn = true;
     int remainingTime = 0;
@@ -70,10 +64,7 @@ private:
     QMediaPlayer *player;
     QAudioOutput *audioOutput;
     imageWindow *img;
-    TimerType Ttype;
-    QString TimeFormat;
     CountDown *countDown;
-
     TimerInfoWindow *info;
     SettingsWindow *settings;
 };

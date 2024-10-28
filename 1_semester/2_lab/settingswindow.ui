@@ -90,7 +90,29 @@
       </layout>
      </item>
      <item>
-      <widget class="QDateEdit" name="dateEdit"/>
+      <widget class="QCalendarWidget" name="calendarWidget">
+       <property name="maximumSize">
+        <size>
+         <width>600</width>
+         <height>200</height>
+        </size>
+       </property>
+       <property name="gridVisible">
+        <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QCalendarWidget::SelectionMode::SingleSelection</enum>
+       </property>
+       <property name="verticalHeaderFormat">
+        <enum>QCalendarWidget::VerticalHeaderFormat::NoVerticalHeader</enum>
+       </property>
+       <property name="navigationBarVisible">
+        <bool>true</bool>
+       </property>
+       <property name="dateEditEnabled">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
