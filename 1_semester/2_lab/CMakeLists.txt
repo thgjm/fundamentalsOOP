@@ -25,7 +25,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         digitalclock.h digitalclock.cpp
         timer.h timer.cpp
-        imagewindow.h imagewindow.cpp imagewindow.ui
+
         resources.qrc
         settingswindow.h settingswindow.cpp settingswindow.ui
 
@@ -34,6 +34,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         timerinfowindow.h timerinfowindow.cpp timerinfowindow.ui
         timerinfo.h
         timerwidget.h timerwidget.cpp timerwidget.ui
+        imagewindow.h imagewindow.cpp imagewindow.ui
+
 
 
     )

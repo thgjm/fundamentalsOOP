@@ -1,7 +1,7 @@
 #include "Timer.h"
 
 Timer::Timer(QObject *parent)
-    : QObject(parent), hourCount(nullptr), minuteCount(nullptr), secondCount(nullptr), AmPm(""), timer(new QTimer(this))
+    : QObject(parent), hourCount(nullptr), minuteCount(nullptr), secondCount(nullptr), AmPm(""), timer(new QTimer(this)), timeZone()
 {
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Timer::timeout);

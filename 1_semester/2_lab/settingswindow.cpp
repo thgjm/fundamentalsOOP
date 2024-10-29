@@ -84,8 +84,12 @@ void SettingsWindow::openTimerLists()
     timer->AmPm = ui->AmPmBox->currentText();
     if(ui->timerName->text()!="")
         title = ui->timerName->text();
-    else
+    else if(Ttype == TimerType::Timer)
         title="Timer";
+    else
+        title="Alarm";
+
+    timer->setTimeZone(&timeZone);
 
     QDateTime currentDateTime = timer->changeTime();
 
@@ -155,6 +159,8 @@ void SettingsWindow::closeEvent(QCloseEvent *event)
 
     ui->calendarWidget->setSelectedDate(timer->changeTime().date());
 
+    ui->timerName->setText("");
+
     event->accept();
 }
 
@@ -197,7 +203,6 @@ bool SettingsWindow::CheckTimeFormat()
         ui->hourCount->setMaximum(23);
         ui->hourCount->setMinimum(0);
         ui->AmPmBox->hide();
-        //ui->hourCount->setValue(0);
         ui->calendarWidget->hide();
         return true;
     }
@@ -334,9 +339,17 @@ void SettingsWindow::setLists()
 void SettingsWindow::setTimeZone(const QTimeZone &zone)
 {
     timeZone = zone;
+    timer->setTimeZone(&timeZone);
+    QDate todayDate = timer->changeTime().date();
+    ui->calendarWidget->setMinimumDate(todayDate);
 }
 
 void SettingsWindow::setTimeFormat(const QString &format)
 {
     TimeFormat = format;
+}
+
+void SettingsWindow::setupUI()
+{
+
 }

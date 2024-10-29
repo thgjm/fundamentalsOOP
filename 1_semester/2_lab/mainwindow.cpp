@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //setupUI();
+
     QString userTimeZoneId = FillTimeZones();
     qDebug() << "The user is in this timezone: " << userTimeZoneId;
 
@@ -30,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(sett, &SettingsWindow::timerListWindowCreated, this, &MainWindow::setTimerListWindow);
 
     connect(ui->clearListButton, &QPushButton::clicked, this, &MainWindow::clearTimerList);
+
+    ui->verticalLayout->setAlignment(ui->pushButton, Qt::AlignCenter);
 }
 
 MainWindow::~MainWindow()
@@ -126,4 +130,79 @@ void MainWindow::showTimerList()
 
 void MainWindow::setTimerListWindow(TimerListWindow* tlists) {
     this->Tlists = tlists; // Збережіть Tlists у MainWindow
+}
+
+void MainWindow::setupUI()
+{
+    /*setStyleSheet(R"(
+        QLabel#labelTime {
+            font-size: 36px;
+            color: #00bcd4;
+        }
+        QPushButton#pushButton {
+            font-size: 16px;
+            background-color: #3c3f41;
+            color: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #5c5f61;
+        }
+        QComboBox#comboBox {
+            font-size: 14px;
+            padding: 6px;
+            border: 1px solid #5c5f61;
+            border-radius: 8px;
+            background-color: #3c3f41;
+            color: #f0f0f0;
+        }
+
+    )");*/
+
+    int fontId = QFontDatabase::addApplicationFont(":/fonts/resources/fonts/Oxanium/static/Oxanium-Regular.ttf");
+    if (fontId != -1) {
+        QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
+        QFont font(family);
+        QApplication::setFont(font);
+    } else {
+        qDebug() << "Font loading failed.";
+    }
+
+    setStyleSheet(R"(
+    QMainWindow, QDialog {
+        background-color: peachpuff;
+    }
+    QPushButton#pushButton, QPushButton#openListButton, QPushButton#clearListButton {
+        font-family: 'Oxanium';
+        font-size: 16px;
+        background-color: rgba(75, 0, 130, 1);
+        color: #f0f0f0;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid white;
+    }
+QPushButton#pushButton:hover,
+QPushButton#openListButton:hover,
+QPushButton#clearListButton:hover {
+        background-color: rgba(75, 0, 130, 0.8);
+    }
+QPushButton#pushButton:pressed,
+QPushButton#openListButton:pressed,
+QPushButton#clearListButton:pressed {
+        background-color: rgba(75, 0, 130, 0.7);
+    }
+    QComboBox {
+        font-family: 'Oxanium';
+        font-size: 14px;
+        padding: 6px;
+        border: 1px solid #5c5f61;
+        border-radius: 8px;
+        background-color: #3c3f41;
+        color: white;
+    }
+    QComboBox QAbstractItemView {
+        background-color: #3c3f41;
+        selection-background-color: #5c5f61;
+        color: white;
+    }
+)");
 }

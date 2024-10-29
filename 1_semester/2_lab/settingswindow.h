@@ -45,6 +45,8 @@ public:
 
     Timer *timer;
 
+    void setupUI();
+
 signals:
     void timerCreated(const TimerInfo &timerInfo);
     void timerListWindowCreated(TimerListWindow* tlists);

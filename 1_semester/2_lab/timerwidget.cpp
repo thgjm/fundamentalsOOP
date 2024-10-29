@@ -3,7 +3,7 @@
 
 TimerWidget::TimerWidget(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings)
     : QStackedWidget(parent)
-    , ui(new Ui::TimerWidget), timerInfo(timerInfo), settings(settings)
+    , ui(new Ui::TimerWidget), timerInfo(timerInfo), settings(settings), player()
 {
     ui->setupUi(this);
 
@@ -22,12 +22,14 @@ TimerWidget::TimerWidget(QWidget *parent, TimerInfo timerInfo, SettingsWindow* s
     {
         qDebug()<<"Timer";
         setCurrentWidget(ui->TimerPage);
+        ui->timerName->setText(timerInfo.Title);
     }
     else if(timerInfo.Ttype == TimerType::Alarm)
     {
         SetAlarmDisplay();
         qDebug()<<"Alarm";
         setCurrentWidget(ui->AlarmPage);
+        ui->alarmName->setText(timerInfo.Title);
     }
 
     ui->horizontalLayout_2->setAlignment(Qt::AlignCenter);
@@ -286,21 +288,50 @@ void TimerWidget::openInfoWindow()
     connect(info, &TimerInfoWindow::timerInfoUpdated, this, &TimerWidget::updateTimerInfo);
 }
 
+
 void TimerWidget::generalTimeout()
 {
-    if(timerInfo.Ttype == TimerType::Timer)
+    if (timerInfo.Ttype == TimerType::Timer)
     {
         timer->stop();
         timerPaused = true;
         ui->stopButton->hide();
         ui->resetButton->setText("Restart Timer");
+        QString msgtext = "Timer '" + timerInfo.Title + "' has elapsed.";
+        QMessageBox* msgBox = new QMessageBox(this);
+        msgBox->setWindowTitle("Timer Finished");
+        msgBox->setText(msgtext);
+        msgBox->setStandardButtons(QMessageBox::Ok);
 
+        // Зупиняємо плеєр, якщо натиснута кнопка "OK"
+        connect(msgBox, &QMessageBox::buttonClicked, this, [this](QAbstractButton* button){
+            if (button->text() == "OK" && player && player->playbackState() == QMediaPlayer::PlayingState)
+            {
+                player->stop();
+            }
+        });
+
+        msgBox->exec();
     }
     else
     {
         ui->alarmTimeLabel->setStyleSheet("QLabel { color : red; }");
         ui->turnOnOffButton->setText("Turn on again.");
 
+        QString msgtext = "Alarm '" + timerInfo.Title + "' has elapsed.";
+        QMessageBox* msgBox = new QMessageBox(this);
+        msgBox->setWindowTitle("Alarm Triggered");
+        msgBox->setText(msgtext);
+        msgBox->setStandardButtons(QMessageBox::Ok);
+
+        connect(msgBox, &QMessageBox::buttonClicked, this, [this](QAbstractButton* button){
+            if (button->text() == "OK" && player && player->playbackState() == QMediaPlayer::PlayingState)
+            {
+                player->stop();
+            }
+        });
+
+        msgBox->exec();
     }
 }
 

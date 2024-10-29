@@ -16,3 +16,17 @@ imageWindow::~imageWindow()
 {
     delete ui;
 }
+
+
+void imageWindow::loadImage()
+{
+    QPixmap pix(imgName);
+    ui->label_pic->setPixmap(pix.scaled(ui->label_pic->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+// Додайте цей метод, щоб перевантажити resizeEvent
+void imageWindow::resizeEvent(QResizeEvent *event)
+{
+    QDialog::resizeEvent(event);
+    loadImage(); // Оновлюємо зображення при зміні розміру
+}

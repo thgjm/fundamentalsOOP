@@ -17,6 +17,9 @@ public:
     explicit imageWindow(QWidget *parent = nullptr, QString FileName = QString());
     ~imageWindow();
 
+    void loadImage();
+    void resizeEvent(QResizeEvent *event);
+
 private:
     Ui::imageWindow *ui;
     QString imgName;

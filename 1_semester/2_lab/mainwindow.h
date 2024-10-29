@@ -24,6 +24,7 @@ public:
     ~MainWindow();
     TimerListWindow *Tlists;
     void clearTimerList();
+    void setupUI();
 
 public slots:
     void setTimerListWindow(TimerListWindow* tlists);
