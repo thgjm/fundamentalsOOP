@@ -21,6 +21,8 @@
 #include <QIcon>
 #include "timerlistwindow.h"
 
+class MainWindow;
+
 namespace Ui {
 class SettingsWindow;
 }
@@ -30,8 +32,10 @@ class SettingsWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit SettingsWindow(QTimeZone *timezone, QString TimeFormat, QWidget *parent = nullptr);
+    explicit SettingsWindow(QTimeZone timezone, QString TimeFormat, QWidget *parent = nullptr, MainWindow *mainWindow = nullptr);
     ~SettingsWindow();
+    void setTimeZone(const QTimeZone &zone);
+    void setTimeFormat(const QString &format);
 
     bool CheckTimeFormat();
 
@@ -40,6 +44,10 @@ public:
     Ui::SettingsWindow *ui;
 
     Timer *timer;
+
+signals:
+    void timerCreated(const TimerInfo &timerInfo);
+    void timerListWindowCreated(TimerListWindow* tlists);
 
 protected:
     void closeEvent(QCloseEvent *event) override;
@@ -59,13 +67,14 @@ private:
     QAudioOutput *audioOutput;
     QFile *file;
     QVBoxLayout *layout;
-    QTimeZone *timeZone;
+    QTimeZone timeZone;
     QTime selectedTime;
     imageWindow *img;
     QString TimeFormat;
-
-    TimerListWindow *Tlists = nullptr;
     TimerType Ttype;
+
+    MainWindow *mainWindow;
+    TimerListWindow *Tlists;
 };
 
 #endif // SETTINGSWINDOW_H

@@ -15,4 +15,8 @@
         <file>resources/fonts/Orbitron/static/Orbitron-Regular.ttf</file>
         <file>resources/fonts/Oxanium/static/Oxanium-Regular.ttf</file>
     </qresource>
+    <qresource prefix="/icons">
+        <file>resources/icons/timerIcon.png</file>
+        <file>resources/icons/trash-bin.png</file>
+    </qresource>
 </RCC>

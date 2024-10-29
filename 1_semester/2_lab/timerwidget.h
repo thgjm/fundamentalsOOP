@@ -1,9 +1,9 @@
-#ifndef TIMERLISTWINDOW_H
-#define TIMERLISTWINDOW_H
+#ifndef TIMERWIDGET_H
+#define TIMERWIDGET_H
 
+#include <QStackedWidget>
 #include <QDialog>
-#include <QScrollArea>
-/*#include <QImage>
+#include <QImage>
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QFile>
@@ -23,30 +23,42 @@
 #include "countdown.h"
 #include "timerinfowindow.h"
 
-class SettingsWindow;*/
-
-#include "timerwidget.h"
+class SettingsWindow;
 
 namespace Ui {
-class TimerListWindow;
+class TimerWidget;
 }
 
-class TimerListWindow : public QDialog
+class TimerWidget : public QStackedWidget
 {
     Q_OBJECT
 
 public:
-    //explicit TimerListWindow(QDialog *parent, TimerInfo timerInfo, SettingsWindow* settings);
-    explicit TimerListWindow(QWidget *parent, SettingsWindow *settings);
-    ~TimerListWindow();
-    void addTimerWidget(const TimerInfo &timerInfo);
-    void removeTimerWidget(TimerWidget* timerWidget);
+    explicit TimerWidget(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings);
+    ~TimerWidget();
+
+    TimerInfo timerInfo;
+
+    bool timerPaused = false;
+    bool AlarmOn = true;
+    int remainingTime = 0;
+
+    QMediaPlayer *player;
+    QAudioOutput *audioOutput;
+    imageWindow *img;
+    CountDown *countDown;
+    TimerInfoWindow *info;
+    SettingsWindow *settings;
+    Timer *timer;
+
+signals:
+    void timerDeleted(TimerWidget* timerWidget);
 
 public slots:
-    void clearAllTimers();
+    void deleteTimer();
 
 private slots:
-    /*void TimerStart();
+    void TimerStart();
     void PlaySoundtrack();
     void ShowImage();
     void openApplication();
@@ -56,25 +68,13 @@ private slots:
     void PauseResume();
     void generalTimeout();
     void openInfoWindow();
-    void updateTimerInfo(TimerInfo timerInfo);
+    void updateTimerInfo(TimerInfo timerInfo, Timer *timer);
 
     void SetAlarmDisplay();
-    void TurnAlarmOnOff();*/
+    void TurnAlarmOnOff();
 
 private:
-
-    //Ui::TimerListWindow *ui;
-
-    QList<TimerWidget*> timerWidgets;
-
-    QVBoxLayout *mainLayout;
-    QWidget *timerSection;
-    QWidget *alarmSection;
-    QVBoxLayout *timerLayout;
-    QVBoxLayout *alarmLayout;
-    QScrollArea *timerScrollArea;
-    QScrollArea *alarmScrollArea;
-    SettingsWindow *settings;
+    Ui::TimerWidget *ui;
 
     /*TimerInfo timerInfo;
 
@@ -90,4 +90,4 @@ private:
     SettingsWindow *settings;*/
 };
 
-#endif // TIMERLISTWINDOW_H
+#endif // TIMERWIDGET_H

@@ -33,6 +33,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         countdown.h countdown.cpp
         timerinfowindow.h timerinfowindow.cpp timerinfowindow.ui
         timerinfo.h
+        timerwidget.h timerwidget.cpp timerwidget.ui
 
 
     )

@@ -22,13 +22,14 @@ public:
     QString TimeFormat;
     QString AmPm;
     int getRemainingTime();
+    bool isActive();
+    QTimeZone *timeZone;
 
 signals:
     void timeout();
 
 private:
     QTimer *timer;
-    QTimeZone *timeZone;
 
     QSpinBox *hourCount;
     QSpinBox *minuteCount;

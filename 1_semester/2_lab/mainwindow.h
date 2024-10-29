@@ -22,6 +22,11 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    TimerListWindow *Tlists;
+    void clearTimerList();
+
+public slots:
+    void setTimerListWindow(TimerListWindow* tlists);
 
 private slots:
     void Clock(const QTimeZone &TimeZone);
@@ -31,6 +36,8 @@ private slots:
     void on_comboBox_2_currentIndexChanged(int index);
 
     void openSettingsWindow();
+
+    void showTimerList();
 
 private:
     Ui::MainWindow *ui;

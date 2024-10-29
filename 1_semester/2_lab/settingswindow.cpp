@@ -4,19 +4,20 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QDesktopServices>
+#include "mainwindow.h"
 
 
 
-SettingsWindow::SettingsWindow(QTimeZone *timezone, QString TimeFormat, QWidget *parent)
+SettingsWindow::SettingsWindow(QTimeZone timezone, QString TimeFormat, QWidget *parent, MainWindow *mainWindow)
     : QDialog(parent), timeZone(timezone), TimeFormat(TimeFormat), selectedTime(0, 0, 0), Ttype(TimerType::Timer)
-    , ui(new Ui::SettingsWindow)
+    , ui(new Ui::SettingsWindow), mainWindow(mainWindow), Tlists(mainWindow->Tlists)
 {
     ui->setupUi(this);
 
     CheckTimeFormat();
 
     timer = new Timer(this);
-    timer->setTimeZone(timeZone);
+    timer->setTimeZone(&timeZone);
 
     QDate todayDate = timer->changeTime().date();
 
@@ -49,9 +50,14 @@ SettingsWindow::~SettingsWindow()
 
 void SettingsWindow::openTimerLists()
 {
-    if (Tlists) {
-        delete Tlists;
-        Tlists = nullptr;
+    if (!Tlists) {
+        Tlists = new TimerListWindow(this, this); // Create only once
+        if (!Tlists) {
+            qDebug() << "Failed to allocate memory for TimerListWindow.";
+            return;
+        }
+        Tlists->setWindowTitle("Timers List");
+        emit timerListWindowCreated(Tlists);
     }
 
     QString soundName="", imageName="", appName="", documentName="", title="";
@@ -69,7 +75,7 @@ void SettingsWindow::openTimerLists()
 
     timer->setSpinBoxes(ui->hourCount, ui->minuteCount, ui->secondCount);
     selectedTime = timer->getInitialTime();
-    QDateTime selectedDateTime = QDateTime(ui->calendarWidget->selectedDate(), selectedTime, *timeZone);
+    QDateTime selectedDateTime = QDateTime(ui->calendarWidget->selectedDate(), selectedTime, timeZone);
 
     if(ui->timerRadioButton->isChecked()) Ttype=TimerType::Timer;
     else if(ui->alarmRadioButton->isChecked()) Ttype=TimerType::Alarm;
@@ -112,11 +118,18 @@ void SettingsWindow::openTimerLists()
         }
     }
 
-    TimerInfo timerInfo(soundName, imageName, appName, documentName, title, selectedDateTime, timer, Ttype);
+    Timer *newTimer = timer;
 
-    Tlists = new TimerListWindow(this, timerInfo, this);
+    TimerInfo newTimerInfo(soundName, imageName, appName, documentName, title, selectedDateTime, newTimer, Ttype);
 
-    Tlists->setWindowTitle("Timers List");
+    /*TimerWidget *timerWidget = new TimerWidget(this, timerInfo, this);
+
+    if (!timerWidget) {
+        qDebug() << "Failed to create TimerWidget.";
+        return;
+    }*/
+
+    emit timerCreated(newTimerInfo);
     Tlists->show();
     this->close();
 }
@@ -316,4 +329,14 @@ void SettingsWindow::setLists()
 
     //documents
     connect(ui->uploadDocumentButton, &QPushButton::clicked, this, &SettingsWindow::uploadDocument);
+}
+
+void SettingsWindow::setTimeZone(const QTimeZone &zone)
+{
+    timeZone = zone;
+}
+
+void SettingsWindow::setTimeFormat(const QString &format)
+{
+    TimeFormat = format;
 }

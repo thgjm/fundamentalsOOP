@@ -123,6 +123,24 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="openListButton">
+        <property name="text">
+         <string>Open timer list</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clearListButton">
+        <property name="text">
+         <string>Clear timer list</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="QComboBox" name="comboBox">
       <property name="placeholderText">
        <string>TimeZone</string>

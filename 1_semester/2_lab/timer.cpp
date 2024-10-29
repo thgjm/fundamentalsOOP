@@ -1,7 +1,7 @@
 #include "Timer.h"
 
 Timer::Timer(QObject *parent)
-    : QObject(parent), hourCount(nullptr), minuteCount(nullptr), secondCount(nullptr), AmPm("")
+    : QObject(parent), hourCount(nullptr), minuteCount(nullptr), secondCount(nullptr), AmPm(""), timer(new QTimer(this))
 {
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &Timer::timeout);
@@ -14,6 +14,7 @@ void Timer::start(int msec)
 
 void Timer::stop()
 {
+    if(timer)
     timer->stop();
 }
 
@@ -52,4 +53,14 @@ int Timer::getRemainingTime() {
 
     int remainingTime = timer->remainingTime()/1000;
     return remainingTime+1;
+}
+
+bool Timer::isActive()
+{
+    if (!timer) {
+        qDebug() << "Timer is nullptr in isActive()";
+        return false;
+    }
+
+    return timer->isActive();
 }

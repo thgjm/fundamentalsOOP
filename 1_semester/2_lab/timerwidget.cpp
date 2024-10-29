@@ -1,116 +1,16 @@
-#include "timerlistwindow.h"
-#include "settingswindow.h"
+#include "timerwidget.h"
+#include "ui_timerwidget.h"
 
-TimerListWindow::TimerListWindow(QWidget *parent, SettingsWindow *settings)
-    : QDialog(parent), settings(settings)
-{
-    setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::WindowCloseButtonHint |
-                   Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-
-    setWindowModality(Qt::NonModal);
-
-    mainLayout = new QVBoxLayout(this);
-
-    timerSection = new QWidget(this);
-    alarmSection = new QWidget(this);
-
-    timerLayout = new QVBoxLayout(timerSection);
-    timerSection->setLayout(timerLayout);
-
-    alarmLayout = new QVBoxLayout(alarmSection);
-    alarmSection->setLayout(alarmLayout);
-
-    timerScrollArea = new QScrollArea(this);
-    timerScrollArea->setWidget(timerSection);
-    timerScrollArea->setWidgetResizable(true);
-
-    alarmScrollArea = new QScrollArea(this);
-    alarmScrollArea->setWidget(alarmSection);
-    alarmScrollArea->setWidgetResizable(true);
-
-    mainLayout->addWidget(timerScrollArea);
-    mainLayout->addWidget(alarmScrollArea);
-
-    setLayout(mainLayout);
-
-    connect(settings, &SettingsWindow::timerCreated, this, &TimerListWindow::addTimerWidget);
-
-}
-
-TimerListWindow::~TimerListWindow()
-{
-    qDeleteAll(timerWidgets);
-}
-
-/*void TimerListWindow::addTimerWidget(TimerWidget *timerWidget)
-{
-    timerWidgets.append(timerWidget);
-
-    if (timerWidget->timerInfo.Ttype == TimerType::Timer)
-    {
-        timerLayout->addWidget(timerWidget);
-    }
-    else if (timerWidget->timerInfo.Ttype == TimerType::Alarm)
-    {
-        alarmLayout->addWidget(timerWidget);
-    }
-}*/
-
-void TimerListWindow::addTimerWidget(const TimerInfo &timerInfo)
-{
-    TimerWidget *newTimerWidget = new TimerWidget(this, timerInfo, settings);
-    if (newTimerWidget->timerInfo.Ttype == TimerType::Timer)
-        timerLayout->addWidget(newTimerWidget);
-    else if (newTimerWidget->timerInfo.Ttype == TimerType::Alarm)
-        alarmLayout->addWidget(newTimerWidget);
-    timerWidgets.append(newTimerWidget);
-
-    connect(newTimerWidget, &TimerWidget::timerDeleted, this, &TimerListWindow::removeTimerWidget);
-
-    //connect(newTimerWidget, &TimerWidget::timerFinished, this, &TimerListWindow::onTimerFinished); // Connect signals if necessary
-}
-
-void TimerListWindow::removeTimerWidget(TimerWidget *timerWidget)
-{
-    // Remove the widget from the layout
-    if (timerWidgets.contains(timerWidget)) {
-        timerWidgets.removeAll(timerWidget);
-
-        // You should remove it from the layout as well
-        if (timerWidget->timerInfo.Ttype == TimerType::Timer) {
-            timerLayout->removeWidget(timerWidget);
-        } else if (timerWidget->timerInfo.Ttype == TimerType::Alarm) {
-            alarmLayout->removeWidget(timerWidget);
-        }
-
-        // Now, delete the widget
-        timerWidget->deleteLater();
-    }
-}
-
-void TimerListWindow::clearAllTimers()
-{
-    for (TimerWidget *timerWidget : qAsConst(timerWidgets))
-    {
-        timerWidget->deleteTimer();
-        if (timerWidget->timerInfo.Ttype == TimerType::Timer) {
-            timerLayout->removeWidget(timerWidget);
-        } else if (timerWidget->timerInfo.Ttype == TimerType::Alarm) {
-            alarmLayout->removeWidget(timerWidget);
-        }
-    }
-    qDeleteAll(timerWidgets);
-    timerWidgets.clear();
-    qDebug() << "All timers have been cleared.";
-}
-
-/*TimerListWindow::TimerListWindow(QDialog *parent, TimerInfo timerInfo, SettingsWindow* settings)
-    : QDialog(parent)
-    , ui(new Ui::TimerListWindow), timerInfo(timerInfo), settings(settings)
+TimerWidget::TimerWidget(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings)
+    : QStackedWidget(parent)
+    , ui(new Ui::TimerWidget), timerInfo(timerInfo), settings(settings)
 {
     ui->setupUi(this);
 
-    SetAlarmDisplay();
+    timer = new Timer(this);
+    timer->AmPm = timerInfo.timer->AmPm;
+    timer->TimeFormat = timerInfo.timer->TimeFormat;
+    timer->timeZone = timerInfo.timer->timeZone;
 
     qDebug()<<timerInfo.soundName;
     qDebug()<<timerInfo.imageName;
@@ -121,46 +21,58 @@ void TimerListWindow::clearAllTimers()
     if(timerInfo.Ttype == TimerType::Timer)
     {
         qDebug()<<"Timer";
-        ui->stackedWidget->setCurrentIndex(0);
+        setCurrentWidget(ui->TimerPage);
     }
-    if(timerInfo.Ttype == TimerType::Alarm)
+    else if(timerInfo.Ttype == TimerType::Alarm)
     {
+        SetAlarmDisplay();
         qDebug()<<"Alarm";
-        ui->stackedWidget->setCurrentIndex(1);
+        setCurrentWidget(ui->AlarmPage);
     }
 
     ui->horizontalLayout_2->setAlignment(Qt::AlignCenter);
 
     qDebug() << timerInfo.selectedDateTime.time().hour()<<":"<<timerInfo.selectedDateTime.time().minute()<<":"<<timerInfo.selectedDateTime.time().second();
 
-    connect(ui->resetButton, &QPushButton::clicked, this, &TimerListWindow::resetTimer);
-    connect(ui->stopButton, &QPushButton::clicked, this, &TimerListWindow::PauseResume);
+    connect(ui->resetButton, &QPushButton::clicked, this, &TimerWidget::resetTimer);
+    connect(ui->stopButton, &QPushButton::clicked, this, &TimerWidget::PauseResume);
 
     TimerStart();
 
     ui->timerName->setText(timerInfo.Title);
 
-    connect(ui->infoButton, &QPushButton::clicked, this, &TimerListWindow::openInfoWindow);
+    connect(ui->infoButton, &QPushButton::clicked, this, &TimerWidget::openInfoWindow);
 
-    connect(ui->turnOnOffButton, &QPushButton::clicked, this, &TimerListWindow::TurnAlarmOnOff);
+    connect(ui->turnOnOffButton, &QPushButton::clicked, this, &TimerWidget::TurnAlarmOnOff);
 
-    connect(ui->alarmInfo, &QPushButton::clicked, this, &TimerListWindow::openInfoWindow);
+    connect(ui->alarmInfo, &QPushButton::clicked, this, &TimerWidget::openInfoWindow);
 
-
-
+    connect(ui->deleteTimerButton, &QPushButton::clicked, this, &TimerWidget::deleteTimer);
+    connect(ui->deleteAlarmButton, &QPushButton::clicked, this, &TimerWidget::deleteTimer);
 }
 
-TimerListWindow::~TimerListWindow()
+TimerWidget::~TimerWidget()
 {
-    //if (timerInfo.timer)
-    //    timerInfo.timer->stop();
-
+    /*if (timer) {
+        timer->stop();
+        delete timer;
+        timer = nullptr;  // Clear pointer after deletion to avoid dangling reference
+    }
+    if (player) {
+        player->stop();
+        delete player;
+    }
+    if (audioOutput) {
+        delete audioOutput;
+    }*/
     delete ui;
 }
 
+
+
 //-------------TIMER----------------
 
-void TimerListWindow::PauseResume()
+void TimerWidget::PauseResume()
 {
     if (timerPaused)
     {
@@ -172,14 +84,14 @@ void TimerListWindow::PauseResume()
     else
     {
         timerPaused = !timerPaused;
-        remainingTime = timerInfo.timer->getRemainingTime();
-        timerInfo.timer->stop();
+        remainingTime = timer->getRemainingTime();
+        timer->stop();
         countDown->stop();
         ui->stopButton->setText("Resume");
     }
 }
 
-void TimerListWindow::resetTimer()
+void TimerWidget::resetTimer()
 {
     if(timerPaused)
     {
@@ -205,7 +117,7 @@ void TimerListWindow::resetTimer()
 
 //-------------ALARM----------------
 
-void TimerListWindow::SetAlarmDisplay()
+void TimerWidget::SetAlarmDisplay()
 {
     ui->alarmTimeLabel->setStyleSheet("QLabel { color : green; }");
 
@@ -233,7 +145,7 @@ void TimerListWindow::SetAlarmDisplay()
     QString DateText = timerInfo.selectedDateTime.date().toString("MMMM d, yyyy");
     ui->alarmDateLabel->setText(DateText);
 
-    if(timerInfo.timer->TimeFormat == "HH:mm:ss")
+    if(timer->TimeFormat == "HH:mm:ss")
     {
         timeText = timerInfo.selectedDateTime.time().toString("HH:mm:ss");
         ui->alarmTimeLabel->setText(timeText);
@@ -241,16 +153,16 @@ void TimerListWindow::SetAlarmDisplay()
     else
     {
         QTime adjustedSelectedTime = timerInfo.selectedDateTime.time();
-        if (timerInfo.timer->AmPm == "PM" && adjustedSelectedTime.hour() != 12)
+        if (timer->AmPm == "PM" && adjustedSelectedTime.hour() != 12)
             adjustedSelectedTime = adjustedSelectedTime.addSecs(12 * 3600);
-        else if (timerInfo.timer->AmPm == "AM" && adjustedSelectedTime.hour() == 12)
+        else if (timer->AmPm == "AM" && adjustedSelectedTime.hour() == 12)
             adjustedSelectedTime = adjustedSelectedTime.addSecs(-12 * 3600);
         timeText = adjustedSelectedTime.toString("hh:mm:ss AP");
         ui->alarmTimeLabel->setText(timeText);
     }
 }
 
-void TimerListWindow::TurnAlarmOnOff()
+void TimerWidget::TurnAlarmOnOff()
 {
     if(ui->turnOnOffButton->text() == "Turn on again.")
     {
@@ -261,13 +173,13 @@ void TimerListWindow::TurnAlarmOnOff()
     }
     if(!AlarmOn)
     {
-        QDateTime currentDateTime = timerInfo.timer->changeTime();
+        QDateTime currentDateTime = timer->changeTime();
         QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
-        if (timerInfo.timer->TimeFormat != "HH:mm:ss")
+        if (timer->TimeFormat != "HH:mm:ss")
         {
-            if (timerInfo.timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
+            if (timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
                 adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(12 * 3600);
-            else if (timerInfo.timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
+            else if (timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
                 adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(-12 * 3600);
         }
 
@@ -286,7 +198,7 @@ void TimerListWindow::TurnAlarmOnOff()
     }
     else
     {
-        timerInfo.timer->stop();
+        timer->stop();
         ui->turnOnOffButton->setText("Turn On");
         ui->alarmTimeLabel->setStyleSheet("QLabel { color : orange; }");
     }
@@ -295,9 +207,9 @@ void TimerListWindow::TurnAlarmOnOff()
 
 //-------------GENERAL----------------
 
-void TimerListWindow::TimerStart()
+void TimerWidget::TimerStart()
 {
-    QDateTime currentDateTime = timerInfo.timer->changeTime();
+    QDateTime currentDateTime = timer->changeTime();
 
     if (timerInfo.Ttype == TimerType::Timer)
     {
@@ -311,22 +223,22 @@ void TimerListWindow::TimerStart()
             if(!timerPaused)
             {
                 countDown->start();
-                timerInfo.timer->start(remainingTime * 1000);
+                timer->start(remainingTime * 1000);
             }
         }
         else
-            timerInfo.timer->stop();
+            timer->stop();
     }
     else if (timerInfo.Ttype == TimerType::Alarm)
     {
         QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
 
         // Handle 12-hour format adjustments
-        if (timerInfo.timer->TimeFormat != "HH:mm:ss")
+        if (timer->TimeFormat != "HH:mm:ss")
         {
-            if (timerInfo.timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
+            if (timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
                 adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(12 * 3600);
-            else if (timerInfo.timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
+            else if (timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
                 adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(-12 * 3600);
         }
 
@@ -337,7 +249,7 @@ void TimerListWindow::TimerStart()
         qDebug() << "Calculated seconds to alarm:" << secondsToPlay;
 
         if (secondsToPlay > 0)
-            timerInfo.timer->start(secondsToPlay * 1000);
+            timer->start(secondsToPlay * 1000);
         else
         {
             timerInfo.selectedDateTime = timerInfo.selectedDateTime.addDays(1);
@@ -348,38 +260,41 @@ void TimerListWindow::TimerStart()
     updateTimeoutConnections();
 }
 
-void TimerListWindow::updateTimeoutConnections()
+void TimerWidget::updateTimeoutConnections()
 {
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::PlaySoundtrack);
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::ShowImage);
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openDocument);
-    disconnect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openApplication);
+    disconnect(timer, &Timer::timeout, this, &TimerWidget::PlaySoundtrack);
+    disconnect(timer, &Timer::timeout, this, &TimerWidget::ShowImage);
+    disconnect(timer, &Timer::timeout, this, &TimerWidget::openDocument);
+    disconnect(timer, &Timer::timeout, this, &TimerWidget::openApplication);
+    disconnect(timer, &Timer::timeout, this, &TimerWidget::generalTimeout);
     if (timerInfo.soundName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::PlaySoundtrack);
+        connect(timer, &Timer::timeout, this, &TimerWidget::PlaySoundtrack);
     if (timerInfo.imageName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::ShowImage);
+        connect(timer, &Timer::timeout, this, &TimerWidget::ShowImage);
     if (timerInfo.documentName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openDocument);
+        connect(timer, &Timer::timeout, this, &TimerWidget::openDocument);
     if (timerInfo.appName!="")
-        connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::openApplication);
-    connect(timerInfo.timer, &Timer::timeout, this, &TimerListWindow::generalTimeout);
+        connect(timer, &Timer::timeout, this, &TimerWidget::openApplication);
+    connect(timer, &Timer::timeout, this, &TimerWidget::generalTimeout);
 }
 
-void TimerListWindow::openInfoWindow()
+void TimerWidget::openInfoWindow()
 {
-    info = new TimerInfoWindow(nullptr, timerInfo, settings);
+    info = new TimerInfoWindow(nullptr, timerInfo, settings, timer);
     info->setWindowTitle("Timer Info Page");
     info->show();
-    connect(info, &TimerInfoWindow::timerInfoUpdated, this, &TimerListWindow::updateTimerInfo);
+    connect(info, &TimerInfoWindow::timerInfoUpdated, this, &TimerWidget::updateTimerInfo);
 }
 
-void TimerListWindow::generalTimeout()
+void TimerWidget::generalTimeout()
 {
     if(timerInfo.Ttype == TimerType::Timer)
     {
+        timer->stop();
         timerPaused = true;
         ui->stopButton->hide();
         ui->resetButton->setText("Restart Timer");
+
     }
     else
     {
@@ -389,7 +304,7 @@ void TimerListWindow::generalTimeout()
     }
 }
 
-void TimerListWindow::updateTimerInfo(TimerInfo newTimerInfo)
+void TimerWidget::updateTimerInfo(TimerInfo newTimerInfo, Timer *timer)
 {
     qDebug() << "got info";
     timerInfo.soundName = newTimerInfo.soundName;
@@ -398,7 +313,7 @@ void TimerListWindow::updateTimerInfo(TimerInfo newTimerInfo)
     timerInfo.documentName = newTimerInfo.documentName;
     timerInfo.selectedDateTime = newTimerInfo.selectedDateTime;
     timerInfo.Title= newTimerInfo.Title;
-    timerInfo.timer= newTimerInfo.timer;
+    timer= timer;
     if (timerInfo.Ttype == TimerType::Timer)
     {
         ui->timerName->setText(timerInfo.Title);
@@ -415,7 +330,7 @@ void TimerListWindow::updateTimerInfo(TimerInfo newTimerInfo)
     updateTimeoutConnections();
 }
 
-void TimerListWindow::PlaySoundtrack()
+void TimerWidget::PlaySoundtrack()
 {
     player = new QMediaPlayer(this);
     audioOutput = new QAudioOutput(this);
@@ -428,10 +343,10 @@ void TimerListWindow::PlaySoundtrack()
     player->play();
     qDebug() << "Soundtrack is playing.";
     qDebug() << "Playing audio from:" << timerInfo.soundName;
-    timerInfo.timer->stop();
+    timer->stop();
 }
 
-void TimerListWindow::ShowImage()
+void TimerWidget::ShowImage()
 {
     img = new imageWindow(this, timerInfo.imageName);
     img->setWindowTitle("Image");
@@ -439,11 +354,11 @@ void TimerListWindow::ShowImage()
     img->setWindowIcon(icon);
     img->show();
     qDebug() << "Photo is shown:" << timerInfo.imageName;
-    timerInfo.timer->stop();
+    timer->stop();
 }
 
 
-void TimerListWindow::openApplication()
+void TimerWidget::openApplication()
 {
     QFileInfo appInfo(timerInfo.appName);
     qDebug() << "Checking application path:" << timerInfo.appName;
@@ -455,10 +370,10 @@ void TimerListWindow::openApplication()
     }
     QProcess::startDetached(timerInfo.appName);
     qDebug() << "Opening application:" << timerInfo.appName;
-    timerInfo.timer->stop();
+    timer->stop();
 }
 
-void TimerListWindow::openDocument()
+void TimerWidget::openDocument()
 {
 
     qDebug() << "Opening document from path:" << timerInfo.documentName;
@@ -466,5 +381,12 @@ void TimerListWindow::openDocument()
         qDebug() << "Document opened successfully.";
     else
         qDebug() << "Failed to open document.";
-    timerInfo.timer->stop();
-}*/
+    timer->stop();
+}
+
+void TimerWidget::deleteTimer()
+{
+    emit timerDeleted(this);
+
+    this->deleteLater();
+}

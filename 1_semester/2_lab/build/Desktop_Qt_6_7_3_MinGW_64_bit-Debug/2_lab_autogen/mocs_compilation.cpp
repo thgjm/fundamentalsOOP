@@ -7,3 +7,4 @@
 #include "EWIEGA46WW/moc_timer.cpp"
 #include "EWIEGA46WW/moc_timerinfowindow.cpp"
 #include "EWIEGA46WW/moc_timerlistwindow.cpp"
+#include "EWIEGA46WW/moc_timerwidget.cpp"

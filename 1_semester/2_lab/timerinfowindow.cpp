@@ -2,11 +2,12 @@
 #include "ui_timerinfowindow.h"
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
+#include "timer.h"
 #include <QMessageBox>
 
-TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings)
+TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings, Timer *timer)
     : QDialog(parent)
-    , ui(new Ui::TimerInfoWindow), timerInfo(timerInfo)
+    , ui(new Ui::TimerInfoWindow), timerInfo(timerInfo), timer(timer)
 {
     ui->setupUi(this);
 
@@ -24,7 +25,7 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsW
 
     if(timerInfo.Ttype == TimerType::Alarm)
     {
-        if(timerInfo.timer->TimeFormat == "HH:mm:ss")
+        if(timer->TimeFormat == "HH:mm:ss")
         {
             ui->hourCount->setMaximum(23);
             ui->hourCount->setMinimum(0);
@@ -224,8 +225,8 @@ void TimerInfoWindow::OKPushed()
     int minutes = ui->minuteCount ? ui->minuteCount->value() : 0;
     int seconds = ui->secondCount ? ui->secondCount->value() : 0;
 
-    if(ui->AmPmBox->currentText() == "AM") timerInfo.timer->AmPm = "AM";
-    else timerInfo.timer->AmPm = "PM";
+    if(ui->AmPmBox->currentText() == "AM") timer->AmPm = "AM";
+    else timer->AmPm = "PM";
 
     timerInfo.selectedDateTime.setTime(QTime(hours, minutes, seconds));
     timerInfo.selectedDateTime.setDate(ui->calendarWidget->selectedDate());
@@ -235,14 +236,14 @@ void TimerInfoWindow::OKPushed()
     if (timerInfo.Ttype == TimerType::Alarm)
     {
 
-        QDateTime currentDateTime=timerInfo.timer->changeTime();
+        QDateTime currentDateTime=timer->changeTime();
         QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
         // Handle 12-hour format adjustments
-        if (timerInfo.timer->TimeFormat != "HH:mm:ss")
+        if (timer->TimeFormat != "HH:mm:ss")
         {
-            if (timerInfo.timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
+            if (timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
                 adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(12 * 3600);
-            else if (timerInfo.timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
+            else if (timer->AmPm == "AM" && adjustedSelectedDateTime.time().hour() == 12)
                 adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(-12 * 3600);
         }
         int secondsToPlay = currentDateTime.secsTo(adjustedSelectedDateTime);
@@ -253,7 +254,7 @@ void TimerInfoWindow::OKPushed()
         }
     }
 
-    emit timerInfoUpdated(timerInfo);
+    emit timerInfoUpdated(timerInfo, timer);
     this->close();
 }
 
