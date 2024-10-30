@@ -50,6 +50,7 @@ public:
     TimerInfoWindow *info;
     SettingsWindow *settings;
     Timer *timer;
+    void setupUI();
 
 signals:
     void timerDeleted(TimerWidget* timerWidget);

@@ -11,6 +11,11 @@ TimerListWindow::TimerListWindow(QWidget *parent, SettingsWindow *settings)
 
     mainLayout = new QVBoxLayout(this);
 
+    QLabel *timersLabel = new QLabel("Timers", this);
+    timersLabel->setAlignment(Qt::AlignCenter);
+    timersLabel->setStyleSheet("font-size: 30px; font-weight: bold; font-style: italic; color: orange; margin: 10px 0px; padding: 5px;");
+    mainLayout->addWidget(timersLabel);
+
     timerSection = new QWidget(this);
     alarmSection = new QWidget(this);
 
@@ -29,6 +34,12 @@ TimerListWindow::TimerListWindow(QWidget *parent, SettingsWindow *settings)
     alarmScrollArea->setWidgetResizable(true);
 
     mainLayout->addWidget(timerScrollArea);
+
+    QLabel *alarmsLabel = new QLabel("Alarms", this);
+    alarmsLabel->setAlignment(Qt::AlignCenter);
+    alarmsLabel->setStyleSheet("font-size: 30px; font-weight: bold; font-style: italic; color: orange; margin: 10px 0px; padding: 5px;");
+    mainLayout->addWidget(alarmsLabel);
+
     mainLayout->addWidget(alarmScrollArea);
 
     setLayout(mainLayout);

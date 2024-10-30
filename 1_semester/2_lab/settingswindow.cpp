@@ -146,7 +146,7 @@ void SettingsWindow::openTimerLists()
     }*/
 
     emit timerCreated(newTimerInfo);
-    Tlists->resize(700, 700);
+    Tlists->resize(1200, 700);
     Tlists->show();
     this->close();
 }
@@ -402,15 +402,6 @@ void SettingsWindow::pauseAudio()
 
 void SettingsWindow::setupUI()
 {
-
-    int fontId = QFontDatabase::addApplicationFont(":/fonts/resources/fonts/Oxanium/static/Oxanium-Regular.ttf");
-    if (fontId != -1) {
-        QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
-        QFont font(family);
-        QApplication::setFont(font);
-    } else {
-        qDebug() << "Font loading failed.";
-    }
     ui->horizontalLayout_9->setAlignment(ui->alarmRadioButton, Qt::AlignCenter);
     ui->horizontalLayout_10->setAlignment(ui->timerRadioButton, Qt::AlignCenter);
     ui->verticalLayout->setAlignment(ui->calendarWidget, Qt::AlignCenter);
@@ -420,15 +411,8 @@ void SettingsWindow::setupUI()
     ui->docLayout->setAlignment(ui->documentCheckBox, Qt::AlignCenter);
     ui->appLayout->setAlignment(ui->appCheckBox, Qt::AlignCenter);
     setStyleSheet(R"(
-    QFrame#frame,
-    QFrame#frame_2,
-    QFrame#frame_3,
-    QFrame#frame_4 {
-        border: 2px solid white;
-    }
 
 QCheckBox {
-    font-family: 'Oxanium';
         color: white;
     }
     QCheckBox::indicator {
@@ -437,9 +421,7 @@ QCheckBox {
     }
 
 QPushButton
-{
-        font-family: 'Oxanium';
-        font-size: 14px;
+{       font-size: 14px;
         background-color: rgba(75, 0, 130, 1);
         color: #f0f0f0;
         padding: 10px;
@@ -452,12 +434,6 @@ QPushButton:pressed {
 background-color: rgba(75, 0, 130, 0.8); }
 
 QPushButton#startButton {
-        font-family: 'Oxanium';
-        font-size: 20px;
-        color: #f0f0f0;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid white;
     background-color: rgba(0, 110, 4, 1);
 }
 
@@ -472,7 +448,6 @@ QPushButton#startButton:pressed {
 
     QComboBox
  {
-        font-family: 'Oxanium';
         font-size: 14px;
         padding: 6px;
         border: 1px solid white;
@@ -488,7 +463,6 @@ QPushButton#startButton:pressed {
     }
 
 QLineEdit {
-        font-family: 'Oxanium';
         font-size: 14px;
         background-color: indigo;
         color: white;
