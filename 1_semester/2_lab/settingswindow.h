@@ -2,23 +2,14 @@
 #define SETTINGSWINDOW_H
 
 #include <QDialog>
-#include <QImage>
-#include <QMediaPlayer>
-#include <QAudioOutput>
-#include <QTimer>
-#include <QFile>
-#include <QTime>
-#include <QVBoxLayout>
-#include <QComboBox>
-#include <QTimeZone>
 #include "timer.h"
 #include "imagewindow.h"
 #include <QCloseEvent>
-#include <QRadioButton>
-#include <QLabel>
-#include <QFontDatabase>
-#include <QMessageBox>
 #include <QIcon>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QProcess>
+#include <QDesktopServices>
 #include "timerlistwindow.h"
 
 class MainWindow;

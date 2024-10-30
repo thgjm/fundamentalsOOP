@@ -1,5 +1,4 @@
 #include "digitalclock.h"
-#include <QFontDatabase>
 
 DigitalClock::DigitalClock(QObject *parent)
     : QObject(parent), timeLabel(nullptr), TimeFormat("HH:mm:ss") {

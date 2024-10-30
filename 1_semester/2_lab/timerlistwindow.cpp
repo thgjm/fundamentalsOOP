@@ -53,20 +53,6 @@ TimerListWindow::~TimerListWindow()
     qDeleteAll(timerWidgets);
 }
 
-/*void TimerListWindow::addTimerWidget(TimerWidget *timerWidget)
-{
-    timerWidgets.append(timerWidget);
-
-    if (timerWidget->timerInfo.Ttype == TimerType::Timer)
-    {
-        timerLayout->addWidget(timerWidget);
-    }
-    else if (timerWidget->timerInfo.Ttype == TimerType::Alarm)
-    {
-        alarmLayout->addWidget(timerWidget);
-    }
-}*/
-
 void TimerListWindow::addTimerWidget(const TimerInfo &timerInfo)
 {
     TimerWidget *newTimerWidget = new TimerWidget(this, timerInfo, settings);
@@ -75,33 +61,25 @@ void TimerListWindow::addTimerWidget(const TimerInfo &timerInfo)
     else if (newTimerWidget->timerInfo.Ttype == TimerType::Alarm)
         alarmLayout->addWidget(newTimerWidget);
     timerWidgets.append(newTimerWidget);
-
     connect(newTimerWidget, &TimerWidget::timerDeleted, this, &TimerListWindow::removeTimerWidget);
-
-    //connect(newTimerWidget, &TimerWidget::timerFinished, this, &TimerListWindow::onTimerFinished); // Connect signals if necessary
 }
 
 void TimerListWindow::removeTimerWidget(TimerWidget *timerWidget)
 {
-    // Remove the widget from the layout
     if (timerWidgets.contains(timerWidget)) {
         timerWidgets.removeAll(timerWidget);
-
-        // You should remove it from the layout as well
         if (timerWidget->timerInfo.Ttype == TimerType::Timer) {
             timerLayout->removeWidget(timerWidget);
         } else if (timerWidget->timerInfo.Ttype == TimerType::Alarm) {
             alarmLayout->removeWidget(timerWidget);
         }
-
-        // Now, delete the widget
         timerWidget->deleteLater();
     }
 }
 
 void TimerListWindow::clearAllTimers()
 {
-    for (TimerWidget *timerWidget : qAsConst(timerWidgets))
+    for (TimerWidget *timerWidget : std::as_const(timerWidgets))
     {
         timerWidget->deleteTimer();
         if (timerWidget->timerInfo.Ttype == TimerType::Timer) {

@@ -33,9 +33,6 @@ QTime Timer::getInitialTime()
     return QTime(hours, minutes, seconds);
 }
 
-
-
-
 void Timer::setTimeZone(QTimeZone *zone)
 {
     timeZone=zone;
@@ -57,10 +54,7 @@ int Timer::getRemainingTime() {
 
 bool Timer::isActive()
 {
-    if (!timer) {
-        qDebug() << "Timer is nullptr in isActive()";
+    if (!timer)
         return false;
-    }
-
     return timer->isActive();
 }

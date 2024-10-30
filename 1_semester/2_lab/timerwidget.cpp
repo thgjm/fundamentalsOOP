@@ -74,7 +74,7 @@ void TimerWidget::PauseResume()
         ui->stopButton->setText("Pause");
 
         ui->stopButton->setStyleSheet("QPushButton { background-color: rgba(204, 85, 0, 1); } "
-                                      "QPushButton:hover { background-color: rgba(204, 85, 0, 0.8); "
+                                      "QPushButton:hover { background-color: rgba(204, 85, 0, 0.8); }"
                                       "QPushButton:pressed { background-color: rgba(204, 85, 0, 0.7); }");
     }
     else
@@ -85,7 +85,7 @@ void TimerWidget::PauseResume()
         countDown->stop();
         ui->stopButton->setText("Resume");
         ui->stopButton->setStyleSheet("QPushButton { background-color: rgba(0, 110, 4, 1); } "
-                                      "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); "
+                                      "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); }"
                                       "QPushButton:pressed { background-color: rgba(0, 110, 4, 0.7); }");
     }
 }
@@ -100,7 +100,7 @@ void TimerWidget::resetTimer()
         countDown->stop();
         ui->stopButton->setText("Start");
         ui->stopButton->setStyleSheet("QPushButton { background-color: rgba(0, 110, 4, 1); } "
-                                      "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); "
+                                      "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); }"
                                       "QPushButton:pressed { background-color: rgba(0, 110, 4, 0.7); }");
     }
     if (countDown)
@@ -110,14 +110,14 @@ void TimerWidget::resetTimer()
         countDown = nullptr;
         if(ui->stopButton->text()!="Start") { ui->stopButton->setText("Pause");
             ui->stopButton->setStyleSheet("QPushButton { background-color: rgba(204, 85, 0, 1); } "
-                                          "QPushButton:hover { background-color: rgba(204, 85, 0, 0.8); "
+                                          "QPushButton:hover { background-color: rgba(204, 85, 0, 0.8); }"
                                           "QPushButton:pressed { background-color: rgba(204, 85, 0, 0.7); }");
         }
     }
     remainingTime = 0;
     ui->resetButton->setText("Reset Timer");
     ui->resetButton->setStyleSheet("QPushButton { background-color: rgba(75, 0, 130, 1); } "
-                                  "QPushButton:hover { background-color: rgba(75, 0, 130, 0.8); "
+                                  "QPushButton:hover { background-color: rgba(75, 0, 130, 0.8); }"
                                   "QPushButton:pressed { background-color: rgba(75, 0, 130, 0.7); }");
     ui->stopButton->show();
     TimerStart();
@@ -176,11 +176,10 @@ void TimerWidget::TurnAlarmOnOff()
     if(ui->turnOnOffButton->text() == "Turn on again.")
     {
         timerInfo.selectedDateTime = timerInfo.selectedDateTime.addDays(1);
-        qDebug() << "next day: "<<timerInfo.selectedDateTime.date();
         SetAlarmDisplay();
         AlarmOn = false;
         ui->turnOnOffButton->setStyleSheet("QPushButton { background-color: rgba(255, 0, 0, 1); } "
-                                           "QPushButton:hover { background-color: rgba(255, 0, 0, 0.8); "
+                                           "QPushButton:hover { background-color: rgba(255, 0, 0, 0.8); }"
                                            "QPushButton:pressed { background-color: rgba(255, 0, 0, 0.7); }");
     }
     if(!AlarmOn)
@@ -202,13 +201,12 @@ void TimerWidget::TurnAlarmOnOff()
         else
         {
             timerInfo.selectedDateTime = timerInfo.selectedDateTime.addDays(1);
-            qDebug() << "next day: "<<timerInfo.selectedDateTime.date();
             SetAlarmDisplay();
         }
         ui->turnOnOffButton->setText("Turn Off");
         ui->alarmTimeLabel->setStyleSheet("QLabel { color : green; }");
         ui->turnOnOffButton->setStyleSheet("QPushButton { background-color: rgba(255, 0, 0, 1); } "
-                                           "QPushButton:hover { background-color: rgba(255, 0, 0, 0.8); "
+                                           "QPushButton:hover { background-color: rgba(255, 0, 0, 0.8); }"
                                            "QPushButton:pressed { background-color: rgba(255, 0, 0, 0.7); }");
     }
     else
@@ -217,7 +215,7 @@ void TimerWidget::TurnAlarmOnOff()
         ui->turnOnOffButton->setText("Turn On");
         ui->alarmTimeLabel->setStyleSheet("QLabel { color : orange; }");
         ui->turnOnOffButton->setStyleSheet("QPushButton { background-color: rgba(0, 110, 4, 1); } "
-                                           "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); "
+                                           "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); }"
                                            "QPushButton:pressed { background-color: rgba(0, 110, 4, 0.7); }");
     }
     AlarmOn = !AlarmOn;
@@ -251,7 +249,6 @@ void TimerWidget::TimerStart()
     {
         QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
 
-        // Handle 12-hour format adjustments
         if (timer->TimeFormat != "HH:mm:ss")
         {
             if (timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
@@ -260,10 +257,8 @@ void TimerWidget::TimerStart()
                 adjustedSelectedDateTime = adjustedSelectedDateTime.addSecs(-12 * 3600);
         }
 
-        // Calculate the seconds until the alarm
         int secondsToPlay = currentDateTime.secsTo(adjustedSelectedDateTime) + 1;
 
-        // Add a debug statement to track the calculated seconds
         qDebug() << "Calculated seconds to alarm:" << secondsToPlay;
 
         if (secondsToPlay > 0)
@@ -271,7 +266,6 @@ void TimerWidget::TimerStart()
         else
         {
             timerInfo.selectedDateTime = timerInfo.selectedDateTime.addDays(1);
-            qDebug() << "next day: "<<timerInfo.selectedDateTime.date();
             SetAlarmDisplay();
         }
     }
@@ -315,7 +309,7 @@ void TimerWidget::generalTimeout()
         ui->stopButton->hide();
         ui->resetButton->setText("Restart Timer");
         ui->resetButton->setStyleSheet("QPushButton { background-color: rgba(0, 110, 4, 1); } "
-                                      "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); "
+                                      "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); }"
                                       "QPushButton:pressed { background-color: rgba(0, 110, 4, 0.7); }");
 
         QString msgtext = "Timer '" + timerInfo.Title + "' has elapsed.";
@@ -324,7 +318,6 @@ void TimerWidget::generalTimeout()
         msgBox->setText(msgtext);
         msgBox->setStandardButtons(QMessageBox::Ok);
 
-        // Зупиняємо плеєр, якщо натиснута кнопка "OK"
         connect(msgBox, &QMessageBox::buttonClicked, this, [this](QAbstractButton* button){
             if (button->text() == "OK" && player && player->playbackState() == QMediaPlayer::PlayingState)
             {
@@ -339,7 +332,7 @@ void TimerWidget::generalTimeout()
         ui->alarmTimeLabel->setStyleSheet("QLabel { color : red; }");
         ui->turnOnOffButton->setText("Turn on again.");
         ui->turnOnOffButton->setStyleSheet("QPushButton { background-color: rgba(0, 110, 4, 1); } "
-                                           "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); "
+                                           "QPushButton:hover { background-color: rgba(0, 110, 4, 0.8); }"
                                            "QPushButton:pressed { background-color: rgba(0, 110, 4, 0.7); }");
 
         QString msgtext = "Alarm '" + timerInfo.Title + "' has elapsed.";
@@ -361,7 +354,6 @@ void TimerWidget::generalTimeout()
 
 void TimerWidget::updateTimerInfo(TimerInfo newTimerInfo, Timer *timer)
 {
-    qDebug() << "got info";
     timerInfo.soundName = newTimerInfo.soundName;
     timerInfo.imageName = newTimerInfo.imageName;
     timerInfo.appName = newTimerInfo.appName;
@@ -452,11 +444,11 @@ void TimerWidget::setupUI()
     ui->verticalLayout_2->setAlignment(ui->alarmName, Qt::AlignCenter);
 
     ui->turnOnOffButton->setStyleSheet("QPushButton { background-color: rgba(255, 0, 0, 1); } "
-                                       "QPushButton:hover { background-color: rgba(255, 0, 0, 0.8); "
+                                       "QPushButton:hover { background-color: rgba(255, 0, 0, 0.8); }"
                                        "QPushButton:pressed { background-color: rgba(255, 0, 0, 0.7); }");
 
     ui->stopButton->setStyleSheet("QPushButton { background-color: rgba(204, 85, 0, 1); } "
-                                  "QPushButton:hover { background-color: rgba(204, 85, 0, 0.8); "
+                                  "QPushButton:hover { background-color: rgba(204, 85, 0, 0.8); }"
                                   "QPushButton:pressed { background-color: rgba(204, 85, 0, 0.7); }");
 
     setStyleSheet(R"(

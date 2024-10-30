@@ -36,6 +36,8 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsW
         ui->hourCount->setMinimum(0);
         ui->AmPmBox->hide();
         ui->calendarWidget->hide();
+        ui->timeFormatInfo->hide();
+        ui->timeZoneInfo->hide();
     }
 
     if(timerInfo.Ttype == TimerType::Alarm)
@@ -295,7 +297,6 @@ void TimerInfoWindow::OKPushed()
 
         QDateTime currentDateTime=timer->changeTime();
         QDateTime adjustedSelectedDateTime = timerInfo.selectedDateTime;
-        // Handle 12-hour format adjustments
         if (timer->TimeFormat != "HH:mm:ss")
         {
             if (timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
@@ -323,8 +324,8 @@ void TimerInfoWindow::CancelPushed()
 
 void TimerInfoWindow::setupUI()
 {
-    ui->horizontalLayout_37->setAlignment(ui->AlarmRadioButton, Qt::AlignCenter);
-    ui->horizontalLayout_38->setAlignment(ui->TimerRadioButton, Qt::AlignCenter);
+    ui->horizontalLayout_38->setAlignment(ui->AlarmRadioButton, Qt::AlignCenter);
+    ui->horizontalLayout_37->setAlignment(ui->TimerRadioButton, Qt::AlignCenter);
     ui->verticalLayout_9->setAlignment(ui->calendarWidget, Qt::AlignCenter);
     ui->verticalLayout_9->setAlignment(ui->timerName, Qt::AlignCenter);
     ui->verticalLayout_5->setAlignment(ui->soundCheckBox_3, Qt::AlignCenter);

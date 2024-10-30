@@ -2,8 +2,6 @@
 #define TIMERINFOWINDOW_H
 
 #include <QDialog>
-#include <QTime>
-#include <QTimer>
 #include <QWidget>
 #include <QComboBox>
 #include <QAbstractButton>

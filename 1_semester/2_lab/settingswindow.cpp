@@ -1,12 +1,6 @@
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QProcess>
-#include <QDesktopServices>
 #include "mainwindow.h"
-#include <QFrame>
-#include <QHeaderView>
 
 
 
@@ -30,8 +24,6 @@ SettingsWindow::SettingsWindow(QTimeZone timezone, QString TimeFormat, QWidget *
     QDate todayDate = timer->changeTime().date();
 
     ui->calendarWidget->setMinimumDate(todayDate);
-
-    qDebug() << todayDate.day();
 
     connect(ui->hourCount, &QSpinBox::valueChanged, this, &SettingsWindow::updateTimeLabel);
     connect(ui->minuteCount, &QSpinBox::valueChanged, this, &SettingsWindow::updateTimeLabel);
@@ -63,7 +55,7 @@ SettingsWindow::~SettingsWindow()
 void SettingsWindow::openTimerLists()
 {
     if (!Tlists) {
-        Tlists = new TimerListWindow(this, this); // Create only once
+        Tlists = new TimerListWindow(this, this);
         if (!Tlists) {
             qDebug() << "Failed to allocate memory for TimerListWindow.";
             return;
@@ -105,16 +97,10 @@ void SettingsWindow::openTimerLists()
 
     QDateTime currentDateTime = timer->changeTime();
 
-    qDebug()<<"currentDateTime: "<<currentDateTime.time().hour()<<" "<<currentDateTime.time().minute()<<" "<<currentDateTime.time().second();
-
-
     if (Ttype == TimerType::Alarm)
     {
         QDateTime adjustedSelectedDateTime = selectedDateTime;
 
-        qDebug()<<"selectedDateTime: "<<selectedDateTime.time().hour()<<" "<<selectedDateTime.time().minute()<<" "<<selectedDateTime.time().second();
-
-        // Handle 12-hour format adjustments
         if (timer->TimeFormat != "HH:mm:ss")
         {
             if (timer->AmPm == "PM" && adjustedSelectedDateTime.time().hour() != 12)
@@ -124,8 +110,6 @@ void SettingsWindow::openTimerLists()
         }
 
         int secondsToPlay = currentDateTime.secsTo(adjustedSelectedDateTime);
-
-        qDebug() << "Alarm mode seconds to play:" << secondsToPlay;
 
         if (secondsToPlay <= 0)
         {
@@ -137,13 +121,6 @@ void SettingsWindow::openTimerLists()
     Timer *newTimer = timer;
 
     TimerInfo newTimerInfo(soundName, imageName, appName, documentName, title, selectedDateTime, newTimer, Ttype);
-
-    /*TimerWidget *timerWidget = new TimerWidget(this, timerInfo, this);
-
-    if (!timerWidget) {
-        qDebug() << "Failed to create TimerWidget.";
-        return;
-    }*/
 
     emit timerCreated(newTimerInfo);
     Tlists->resize(1200, 700);
@@ -381,12 +358,10 @@ void SettingsWindow::playAudio()
     audioTimer->setSingleShot(true);
     audioTimer->start(3000);
     connect(audioTimer, &QTimer::timeout, [this]() {
-        if (player->isPlaying()) {
+        if (player->isPlaying())
             player->stop();
-        }
-        if (audioTimer->isActive()) {
+        if (audioTimer->isActive())
             audioTimer->stop();
-        }
         ui->playButton->show();
         ui->pauseButton->hide();
     });

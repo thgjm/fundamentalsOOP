@@ -27,18 +27,16 @@ void CountDown::setDisplay(QLabel *display)
     if (fontId != -1) {
         QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
         countdownLabel->setFont(QFont(family, 40));
-    } else {
+    } else
         qDebug() << "The font was not uploaded.";
-    }
 }
 
 void CountDown::updateTime() {
 
     if (countTimeLeft > QTime(0, 0)) {
         QString timeText = countTimeLeft.toString("HH:mm:ss");
-        if (countdownLabel) {
+        if (countdownLabel)
             countdownLabel->setText(timeText);
-        }
         countTimeLeft = countTimeLeft.addSecs(-1);
     } else {
         countdownLabel->setText("00:00:00");

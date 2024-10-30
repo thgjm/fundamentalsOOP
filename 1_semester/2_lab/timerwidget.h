@@ -11,7 +11,6 @@
 #include <QComboBox>
 #include <QTimeZone>
 #include "imagewindow.h"
-//#include <QCloseEvent>
 #include <QRadioButton>
 #include <QLabel>
 #include <QFontDatabase>

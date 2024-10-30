@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QFont>
 #include <QComboBox>
+#include <QFontDatabase>
 
 class DigitalClock : public QObject {
     Q_OBJECT

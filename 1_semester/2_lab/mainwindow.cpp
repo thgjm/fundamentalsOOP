@@ -43,11 +43,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::clearTimerList()
 {
-    if (Tlists) {
+    if (Tlists)
         Tlists->clearAllTimers();
-    } else {
+     else
         qDebug() << "TimerListWindow is not created yet.";
-    }
 }
 
 void MainWindow::openSettingsWindow()
@@ -131,35 +130,11 @@ void MainWindow::showTimerList()
 }
 
 void MainWindow::setTimerListWindow(TimerListWindow* tlists) {
-    this->Tlists = tlists; // Збережіть Tlists у MainWindow
+    this->Tlists = tlists;
 }
 
 void MainWindow::setupUI()
 {
-    /*setStyleSheet(R"(
-        QLabel#labelTime {
-            font-size: 36px;
-            color: #00bcd4;
-        }
-        QPushButton#pushButton {
-            font-size: 16px;
-            background-color: #3c3f41;
-            color: #f0f0f0;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #5c5f61;
-        }
-        QComboBox#comboBox {
-            font-size: 14px;
-            padding: 6px;
-            border: 1px solid #5c5f61;
-            border-radius: 8px;
-            background-color: #3c3f41;
-            color: #f0f0f0;
-        }
-
-    )");*/
-
     int fontId = QFontDatabase::addApplicationFont(":/fonts/resources/fonts/Oxanium/static/Oxanium-Regular.ttf");
     if (fontId != -1) {
         QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
