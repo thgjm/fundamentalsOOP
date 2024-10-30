@@ -61,6 +61,8 @@ private slots:
     void uploadSound();
     void uploadApp();
     void uploadDocument();
+    void playAudio();
+    void pauseAudio();
 
 private:
 
@@ -74,6 +76,7 @@ private:
     imageWindow *img;
     QString TimeFormat;
     TimerType Ttype;
+    QTimer *audioTimer;
 
     MainWindow *mainWindow;
     TimerListWindow *Tlists;

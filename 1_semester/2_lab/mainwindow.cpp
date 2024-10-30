@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    //setupUI();
+    setupUI();
 
     QString userTimeZoneId = FillTimeZones();
     qDebug() << "The user is in this timezone: " << userTimeZoneId;
@@ -54,6 +54,7 @@ void MainWindow::openSettingsWindow()
 {
     sett->setModal(true);
     sett->setWindowTitle("Settings");
+    sett->resize(600, 600);
     sett->show();
     sett->exec();
 }
@@ -123,6 +124,7 @@ void MainWindow::showTimerList()
         Tlists->setWindowTitle("Timers List");
     }
     if(Tlists->isMinimized()) Tlists->showNormal();
+    Tlists->resize(700, 700);
     Tlists->show();
     Tlists->raise();
     Tlists->activateWindow();
@@ -169,7 +171,7 @@ void MainWindow::setupUI()
 
     setStyleSheet(R"(
     QMainWindow, QDialog {
-        background-color: peachpuff;
+        background-color: black;
     }
     QPushButton#pushButton, QPushButton#openListButton, QPushButton#clearListButton {
         font-family: 'Oxanium';
@@ -190,16 +192,20 @@ QPushButton#openListButton:pressed,
 QPushButton#clearListButton:pressed {
         background-color: rgba(75, 0, 130, 0.7);
     }
-    QComboBox {
+    QComboBox#comboBox,
+    QComboBox#comboBox_2
+ {
         font-family: 'Oxanium';
         font-size: 14px;
         padding: 6px;
-        border: 1px solid #5c5f61;
+        border: 1px solid white;
         border-radius: 8px;
         background-color: #3c3f41;
         color: white;
     }
-    QComboBox QAbstractItemView {
+    QComboBox QAbstractItemView#comboBox,
+QComboBox QAbstractItemView#comboBox_2
+ {
         background-color: #3c3f41;
         selection-background-color: #5c5f61;
         color: white;

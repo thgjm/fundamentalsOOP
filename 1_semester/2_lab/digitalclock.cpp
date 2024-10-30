@@ -19,7 +19,7 @@ void DigitalClock::stop() {
 void DigitalClock::setDisplay(QLabel *display)
 {
     timeLabel = display;
-    timeLabel->setStyleSheet("QLabel { color : black; }");
+    timeLabel->setStyleSheet("QLabel { color : white; }");
 
     int fontId = QFontDatabase::addApplicationFont(":/fonts/resources/fonts/Orbitron/static/Orbitron-Regular.ttf");
     if (fontId != -1) {

@@ -284,6 +284,7 @@ void TimerWidget::openInfoWindow()
 {
     info = new TimerInfoWindow(nullptr, timerInfo, settings, timer);
     info->setWindowTitle("Timer Info Page");
+    info->resize(600, 600);
     info->show();
     connect(info, &TimerInfoWindow::timerInfoUpdated, this, &TimerWidget::updateTimerInfo);
 }

@@ -7,9 +7,24 @@
 
 TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsWindow* settings, Timer *timer)
     : QDialog(parent)
-    , ui(new Ui::TimerInfoWindow), timerInfo(timerInfo), timer(timer)
+    , ui(new Ui::TimerInfoWindow), timerInfo(timerInfo), timer(timer), player()
 {
     ui->setupUi(this);
+
+    setupUI();
+
+    ui->PauseButton->hide();
+
+    audioTimer = new QTimer(this);
+
+    QString timeZoneInfo = "The timer's timezone is: " + timer->timeZone->id() + ".";
+    QString formatinfo = "The timer's time format is: ";
+    if(timer->TimeFormat == "HH:mm:ss") formatinfo+="24-h format.";
+    else formatinfo+="12-h format.";
+
+    ui->timeZoneInfo->setText(timeZoneInfo);
+    ui->timeFormatInfo->setText(formatinfo);
+
 
     ui->calendarWidget->setMinimumDate(settings->ui->calendarWidget->minimumDate());
 
@@ -52,7 +67,7 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsW
 
         if(timerInfo.soundName!="")
         {
-            ui->soundCheckBox->setChecked(true);
+            ui->soundCheckBox_3->setChecked(true);
             int index = -1;
             for (int i = 0; i < ui->soundComboBox->count(); ++i)
                 if (ui->soundComboBox->itemData(i).toString() == timerInfo.soundName)
@@ -121,6 +136,10 @@ TimerInfoWindow::TimerInfoWindow(QWidget *parent, TimerInfo timerInfo, SettingsW
 
     connect(ui->OKButton, &QPushButton::clicked, this, &TimerInfoWindow::OKPushed);
     connect(ui->CancelButton, &QPushButton::clicked, this, &TimerInfoWindow::CancelPushed);
+
+    connect(ui->PlayButton, &QPushButton::clicked, this, &TimerInfoWindow::playAudio);
+    connect(ui->soundComboBox, &QComboBox::currentIndexChanged, this, &TimerInfoWindow::playAudio);
+    connect(ui->PauseButton, &QPushButton::clicked, this, &TimerInfoWindow::pauseAudio);
 }
 
 TimerInfoWindow::~TimerInfoWindow()
@@ -200,9 +219,47 @@ void TimerInfoWindow::uploadDocument()
     QMessageBox::information(this, tr("Document Uploaded"), tr("You have successfully uploaded the document: %1").arg(docName));
 }
 
+void TimerInfoWindow::playAudio()
+{
+    ui->PlayButton->hide();
+    ui->PauseButton->show();
+    player = new QMediaPlayer(this);
+    audioOutput = new QAudioOutput(this);
+
+    player->setAudioOutput(audioOutput);
+    QString soundName = ui->soundComboBox->currentData().toString();
+    if (soundName.startsWith("qrc:/"))
+        player->setSource(QUrl(soundName));
+    else
+        player->setSource(QUrl::fromLocalFile(soundName));
+    audioOutput->setVolume(50);
+    player->play();
+
+    audioTimer->setSingleShot(true);
+    audioTimer->start(3000);
+    connect(audioTimer, &QTimer::timeout, [this]() {
+        if (player->isPlaying()) {
+            player->stop();
+        }
+        if (audioTimer->isActive()) {
+            audioTimer->stop();
+        }
+        ui->PlayButton->show();
+        ui->PauseButton->hide();
+    });
+}
+
+void TimerInfoWindow::pauseAudio()
+{
+    if(player->isPlaying()) player->stop();
+    ui->PlayButton->show();
+    ui->PauseButton->hide();
+    if(audioTimer->isActive()) audioTimer->stop();
+}
+
 void TimerInfoWindow::OKPushed()
 {
-    if (ui->soundCheckBox->isChecked())
+    if (ui->soundCheckBox_3->isChecked())
         timerInfo.soundName = ui->soundComboBox->currentData().toString();
     else
         timerInfo.soundName="";
@@ -262,4 +319,159 @@ void TimerInfoWindow::OKPushed()
 void TimerInfoWindow::CancelPushed()
 {
     this->close();
+}
+
+void TimerInfoWindow::setupUI()
+{
+
+    int fontId = QFontDatabase::addApplicationFont(":/fonts/resources/fonts/Oxanium/static/Oxanium-Regular.ttf");
+    if (fontId != -1) {
+        QString family = QFontDatabase::applicationFontFamilies(fontId).at(0);
+        QFont font(family);
+        QApplication::setFont(font);
+    } else {
+        qDebug() << "Font loading failed.";
+    }
+    ui->horizontalLayout_37->setAlignment(ui->AlarmRadioButton, Qt::AlignCenter);
+    ui->horizontalLayout_38->setAlignment(ui->TimerRadioButton, Qt::AlignCenter);
+    ui->verticalLayout_9->setAlignment(ui->calendarWidget, Qt::AlignCenter);
+    ui->verticalLayout_9->setAlignment(ui->timerName, Qt::AlignCenter);
+    ui->verticalLayout_5->setAlignment(ui->soundCheckBox_3, Qt::AlignCenter);
+    ui->verticalLayout_6->setAlignment(ui->imageCheckBox, Qt::AlignCenter);
+    ui->verticalLayout_8->setAlignment(ui->documentCheckBox, Qt::AlignCenter);
+    ui->verticalLayout_7->setAlignment(ui->appCheckBox, Qt::AlignCenter);
+    setStyleSheet(R"(
+    QFrame#frame,
+    QFrame#frame_2,
+    QFrame#frame_3,
+    QFrame#frame_4 {
+        border: 2px solid white;
+    }
+
+QCheckBox {
+    font-family: 'Oxanium';
+        color: white;
+    }
+    QCheckBox::indicator {
+        width: 20px;
+        height: 20px;
+    }
+
+QPushButton
+{
+        font-family: 'Oxanium';
+        font-size: 14px;
+        background-color: rgba(75, 0, 130, 1);
+        color: #f0f0f0;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid white;
+}
+QPushButton:hover {
+background-color: rgba(75, 0, 130, 0.8); }
+QPushButton:pressed {
+background-color: rgba(75, 0, 130, 0.8); }
+
+QPushButton#startButton {
+        font-family: 'Oxanium';
+        font-size: 20px;
+        color: #f0f0f0;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid white;
+    background-color: rgba(0, 110, 4, 1);
+}
+
+QPushButton#startButton:hover {
+    background-color: rgba(0, 110, 4, 0.8);
+}
+
+QPushButton#startButton:pressed {
+    background-color: rgba(0, 110, 4, 0.7);
+}
+
+
+    QComboBox
+ {
+        font-family: 'Oxanium';
+        font-size: 14px;
+        padding: 6px;
+        border: 1px solid white;
+        border-radius: 8px;
+        background-color: #3c3f41;
+        color: white;
+    }
+    QComboBox QAbstractItemView
+ {
+        background-color: #3c3f41;
+        selection-background-color: #5c5f61;
+        color: white;
+    }
+
+QLineEdit {
+        font-family: 'Oxanium';
+        font-size: 14px;
+        background-color: indigo;
+        color: white;
+        border: 1px solid white;
+        border-radius: 8px;
+        padding: 5px;
+    }
+
+
+
+    QSpinBox {
+        background-color: lightgray;
+        color: black;
+        border: 1px solid darkgray;
+        padding: 5px;
+        font-size: 14px;
+        border-radius: 5px;
+    }
+
+QSpinBox:focus {
+        border: 1px solid indigo;
+        background-color: white;
+    }
+    QSpinBox::up-button, QSpinBox::down-button {
+        background-color: darkgray;
+        border: none;
+        width: 15px;
+    }
+    QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+        background-color: rgba(75, 0, 130, 0.8);;
+    }
+    QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {
+        background-color: rgba(75, 0, 130, 0.7);;
+    }
+
+QLabel {
+        font-family: 'Oxanium';
+        font-size: 20px;
+}
+
+QPushButton#OKButton {
+    background-color: rgba(0, 110, 4, 1)
+}
+
+QPushButton#OKButton:hover {
+    background-color: rgba(0, 110, 4, 0.8)
+}
+
+QPushButton#OKButton:pressed {
+    background-color: rgba(0, 110, 4, 0.8)
+}
+
+QPushButton#CancelButton {
+    background-color: rgba(255, 140, 0, 1)
+}
+
+QPushButton#CancelButton:hover {
+    background-color: rgba(255, 140, 0, 0.8)
+}
+
+QPushButton#CancelButton:pressed {
+    background-color: rgba(255, 140, 0, 0.8)
+}
+)");
 }
