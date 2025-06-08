@@ -118,6 +118,11 @@ void SettingsWindow::openTimerLists()
         }
     }
 
+    if(ui->hourCount ==0 && ui->minuteCount == 0 && ui->secondCount==0)
+    {
+
+    }
+
     Timer *newTimer = timer;
 
     TimerInfo newTimerInfo(soundName, imageName, appName, documentName, title, selectedDateTime, newTimer, Ttype);
