@@ -1,4 +1,4 @@
-#include "headers/SequentialMultiplier.h"
+#include "../headers/SequentialMultiplier.h"
 #include <stdexcept>
 
 Matrix SequentialMultiplier::multiply(const Matrix& a, const Matrix& b) {
