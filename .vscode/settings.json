@@ -67,7 +67,9 @@
     "variant": "cpp",
     "cerrno": "cpp",
     "cfloat": "cpp",
-    "climits": "cpp"
+    "climits": "cpp",
+    "chrono": "cpp",
+    "future": "cpp"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "cmake.ignoreCMakeListsMissing": true
