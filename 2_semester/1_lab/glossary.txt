@@ -1,3 +1,6 @@
+//original code source to this semester's educational project: https://github.com/IriskaIK/yet-another-orm-implementation
+
+
 Project Glossary:
 
 1. Core Components:
