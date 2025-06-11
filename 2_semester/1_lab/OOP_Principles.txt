@@ -4,6 +4,7 @@ OOP principles that are used in the project:
 
 a) Encapsulation:
   - Private fields and methods are used extensively, for example in PostgresDriver:
+
     /*
     private static instance: PostgresDriver | null = null;
     private pool: Pool | null = null;
@@ -14,6 +15,7 @@ a) Encapsulation:
 
 b) Inheritance:
   - Class inheritance is used with extends:
+
     /*
     export class BaseModel<T extends BaseModel<T>> extends BaseModelStatic<T>
     export abstract class PostgresQueryCompiler
@@ -22,6 +24,7 @@ b) Inheritance:
 
 c) Polymorphism:
   - Interface-based polymorphism through Driver interface:
+
     /*
     export interface Driver {
     connect(): Promise<void>;
@@ -94,8 +97,6 @@ d) Principle of Least Astonishment:
   - Methods do what their names suggest
   - Similar patterns used throughout the codebase
   - Predictable class hierarchies and relationships
-
-
 
 e) Patterns:
 link to the patterns description:
