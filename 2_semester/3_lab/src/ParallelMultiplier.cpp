@@ -1,4 +1,4 @@
-#include "ParallelMultiplier.h"
+#include "headers/ParallelMultiplier.h"
 #include <stdexcept>
 
 ParallelMultiplier::ParallelMultiplier(size_t numThreads)

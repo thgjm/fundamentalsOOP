@@ -19,7 +19,7 @@ public:
     double& at(size_t i, size_t j) { return data[i][j]; }
     const double& at(size_t i, size_t j) const { return data[i][j]; }
     
-    void randomize(double min, double max);
+    void randomize();
     void print() const;
     
     static bool canMultiply(const Matrix& a, const Matrix& b);

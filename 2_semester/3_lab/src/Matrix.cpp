@@ -1,4 +1,4 @@
-#include "..headers/Matrix.h"
+#include "headers/Matrix.h"
 #include <random>
 #include <iomanip>
 
@@ -8,10 +8,10 @@ Matrix::Matrix(size_t rows, size_t cols)
 Matrix::Matrix(const vector<vector<double>>& data)
     : data(data), rows(data.size()), cols(data[0].size()) {}
 
-void Matrix::randomize(double min, double max) {
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_real_distribution<> dis(min, max);
+void Matrix::randomize() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
 
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
