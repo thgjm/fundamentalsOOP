@@ -2,9 +2,28 @@
 #include "MatrixMultiplier.h"
 #include <stdexcept>
 
+/**
+ * @brief Sequential implementation of matrix multiplication
+ * 
+ * This class implements matrix multiplication using a standard sequential
+ * algorithm. It serves as a baseline for comparing performance with
+ * parallel implementations.
+ */
 class SequentialMultiplier : public MatrixMultiplier {
 public:
+    /**
+     * @brief Multiplies two matrices sequentially
+     * @param a First matrix
+     * @param b Second matrix
+     * @return Matrix - result of matrix multiplication
+     */
     Matrix multiply(const Matrix& a, const Matrix& b) override;
+
+
+    /**
+     * @brief Gets the name of the multiplication algorithm
+     * @return  const char* - "Sequential" as the algorithm identifier
+     */
     const char* getName() const override { return "Sequential"; }
 }; 
 
