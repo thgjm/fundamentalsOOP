@@ -32,9 +32,7 @@ void ParallelMultiplier::multiplyRange(const Matrix& a, const Matrix& b,
 }
 
 Matrix ParallelMultiplier::multiply(const Matrix& a, const Matrix& b) {
-    if (!Matrix::canMultiply(a, b)) {
-        throw invalid_argument("Matrix dimensions are not compatible for multiplication");
-    }
+    validateMatrices(a, b);
 
     Matrix result(a.getRows(), b.getCols());
     vector<thread> threads;
